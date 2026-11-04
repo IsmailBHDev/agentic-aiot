@@ -1,4 +1,4 @@
 pandas
 scikit-learn
 joblib
-aiocoap
+aiocoappaho-mqtt>=2,<3

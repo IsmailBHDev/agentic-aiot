@@ -9,6 +9,7 @@ from pathlib import Path
 import socket
 import asyncio
 from aiocoap import Context, Message, POST
+from mqttsn import MqttSnClient
 
 devices = ["node-01", "node-02", "node-03"]
 
@@ -32,8 +33,8 @@ EDGE_PORT = 5000
 
 
 COAP_URL = "coap://127.0.0.1:5683/telemetry"
-
-
+MQTTSN_HOST = "127.0.0.1"
+MQTTSN_PORT = 10001
 async def send_to_edge_coap(protocol, message):
 
     request = Message(
@@ -58,6 +59,29 @@ async def send_to_edge_coap(protocol, message):
 
     except Exception as error:
         print(f"COAP DEVICE : Erreur : {error}")
+
+
+async def send_to_edge_mqttsn(client, message):
+    """Publie une mesure IoT via MQTT-SN."""
+
+    device_id = message["src"]["agent"]
+    topic = f"aiot/telemetry/{device_id}"
+
+    payload = json.dumps(message).encode("utf-8")
+
+    try:
+        await client.publish(topic, payload, qos=1)
+
+        print(
+            f"MQTT-SN DEVICE : {device_id} "
+            f"envoye sur {topic}"
+        )
+
+    except Exception as error:
+        print(
+            f"MQTT-SN DEVICE : Erreur pour "
+            f"{device_id} : {error}"
+        )
 
 
 def send_to_edge(message):
@@ -159,11 +183,24 @@ def simulate_device(device_id, iteration):
 latencies = []
 
 
+
 async def run_simulation():
 
-    protocol = await Context.create_client_context()
+    # Un client MQTT-SN pour chaque capteur simulé
+    clients = {}
 
     try:
+        for device in devices:
+            client = MqttSnClient(client_id=device)
+
+            await client.connect(
+                MQTTSN_HOST,
+                MQTTSN_PORT
+            )
+
+            clients[device] = client
+
+        # Simulation de 10 itérations
         for i in range(10):
 
             print(f"\n===== ITERATION {i + 1} =====")
@@ -178,12 +215,17 @@ async def run_simulation():
 
                 message["iteration"] = i + 1
 
-                await send_to_edge_coap(protocol, message)
+                # Transmission MQTT-SN
+                await send_to_edge_mqttsn(
+                    clients[device],
+                    message
+                )
 
             await asyncio.sleep(1)
 
     finally:
-        await protocol.shutdown()
+        for client in clients.values():
+            await client.close()
 
 
 asyncio.run(run_simulation())
