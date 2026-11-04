@@ -1,0 +1,20 @@
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Logs et incidents générés
+*.log
+data/incidents.jsonl
+
+# Fichiers temporaires
+*.tmp
+.DS_Store
+Thumbs.db
