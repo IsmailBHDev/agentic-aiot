@@ -7,6 +7,8 @@ import joblib
 import pandas as pd
 from pathlib import Path
 import socket
+import asyncio
+from aiocoap import Context, Message, POST
 
 devices = ["node-01", "node-02", "node-03"]
 
@@ -27,6 +29,35 @@ print("Modèle ML chargé avec succès")
 
 EDGE_HOST = "127.0.0.1"
 EDGE_PORT = 5000
+
+
+COAP_URL = "coap://127.0.0.1:5683/telemetry"
+
+
+async def send_to_edge_coap(protocol, message):
+
+    request = Message(
+        code=POST,
+        uri=COAP_URL,
+        payload=json.dumps(message).encode("utf-8")
+    )
+
+    try:
+        response = await protocol.request(request).response
+
+        if response.code.is_successful():
+            print(
+                f"COAP DEVICE : {message['src']['agent']} "
+                f"envoye - {response.code}"
+            )
+        else:
+            print(
+                f"COAP DEVICE : Requete refusee "
+                f"- {response.code}"
+            )
+
+    except Exception as error:
+        print(f"COAP DEVICE : Erreur : {error}")
 
 
 def send_to_edge(message):
@@ -124,28 +155,38 @@ def simulate_device(device_id, iteration):
     return message
 
 
+
 latencies = []
 
-# Boucle principale
-for i in range(10):
 
-    print(f"\n===== ITERATION {i + 1} =====")
+async def run_simulation():
 
-    for device in devices:
+    protocol = await Context.create_client_context()
 
-        message = simulate_device(device, i)
+    try:
+        for i in range(10):
 
-        latencies.append(
-            message["payload"]["inference_ms"]
-        )
+            print(f"\n===== ITERATION {i + 1} =====")
 
-        # Identifier l'iteration pour l'analyse collective
-        message["iteration"] = i + 1
+            for device in devices:
 
-        # Envoyer la mesure au serveur Edge
-        send_to_edge(message)
+                message = simulate_device(device, i)
 
-    time.sleep(1)
+                latencies.append(
+                    message["payload"]["inference_ms"]
+                )
+
+                message["iteration"] = i + 1
+
+                await send_to_edge_coap(protocol, message)
+
+            await asyncio.sleep(1)
+
+    finally:
+        await protocol.shutdown()
+
+
+asyncio.run(run_simulation())
 
 
 
