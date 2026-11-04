@@ -3,10 +3,10 @@ import time
 import json
 import uuid
 from datetime import datetime, timezone
-from edge_agent import process_message, analyze_devices
 import joblib
 import pandas as pd
 from pathlib import Path
+import socket
 
 devices = ["node-01", "node-02", "node-03"]
 
@@ -23,6 +23,32 @@ MODEL_FILE = BASE_DIR / "models" / "device_model.joblib"
 model = joblib.load(MODEL_FILE)
 
 print("Modèle ML chargé avec succès")
+
+
+EDGE_HOST = "127.0.0.1"
+EDGE_PORT = 5000
+
+
+def send_to_edge(message):
+    """Envoie un message JSON au serveur Edge via TCP."""
+
+    try:
+        with socket.create_connection(
+            (EDGE_HOST, EDGE_PORT),
+            timeout=5
+        ) as client:
+
+            data = json.dumps(message) + "\n"
+
+            client.sendall(data.encode("utf-8"))
+
+            print(
+                f"DEVICE : Message envoyé par "
+                f"{message['src']['agent']}"
+            )
+
+    except OSError as error:
+        print(f"DEVICE : Erreur réseau : {error}")
 
 
 def create_message(device_id, temperature, anomaly):
@@ -97,6 +123,7 @@ def simulate_device(device_id, iteration):
 
     return message
 
+
 latencies = []
 
 # Boucle principale
@@ -104,20 +131,22 @@ for i in range(10):
 
     print(f"\n===== ITERATION {i + 1} =====")
 
-    messages = []
-
     for device in devices:
+
         message = simulate_device(device, i)
-        latencies.append(message["payload"]["inference_ms"])
 
+        latencies.append(
+            message["payload"]["inference_ms"]
+        )
 
-        process_message(message)
-        messages.append(message)
+        # Identifier l'iteration pour l'analyse collective
+        message["iteration"] = i + 1
 
-    # Analyse collective après réception des 3 mesures
-    analyze_devices(messages)
+        # Envoyer la mesure au serveur Edge
+        send_to_edge(message)
 
     time.sleep(1)
+
 
 
 from statistics import mean
