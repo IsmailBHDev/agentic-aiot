@@ -1,7 +1,0 @@
-{
-    "total_predictions": 30,
-    "average_latency_ms": 2.033,
-    "max_latency_ms": 15.2237,
-    "p95_latency_ms": 5.2616,
-    "model_size_bytes": 1801
-}
