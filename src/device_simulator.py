@@ -1,15 +1,24 @@
+
 import random
 import time
 import json
 import uuid
-from datetime import datetime, timezone
-import joblib
-import pandas as pd
-from pathlib import Path
+import math
 import socket
 import asyncio
+from datetime import datetime, timezone
+from pathlib import Path
+from statistics import mean
+
+import joblib
+import pandas as pd
 from aiocoap import Context, Message, POST
 from mqttsn import MqttSnClient
+
+
+# ==========================================
+# 1. CONFIGURATION
+# ==========================================
 
 devices = ["node-01", "node-02", "node-03"]
 
@@ -20,6 +29,7 @@ device_states = {
     "node-02": "NORMAL",
     "node-03": "NORMAL"
 }
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 MODEL_FILE = BASE_DIR / "models" / "device_model.joblib"
 
@@ -27,14 +37,21 @@ model = joblib.load(MODEL_FILE)
 
 print("Modèle ML chargé avec succès")
 
-
 EDGE_HOST = "127.0.0.1"
 EDGE_PORT = 5000
 
-
 COAP_URL = "coap://127.0.0.1:5683/telemetry"
+
 MQTTSN_HOST = "127.0.0.1"
 MQTTSN_PORT = 10001
+
+latencies = []
+
+
+# ==========================================
+# 2. COMMUNICATION COAP
+# ==========================================
+
 async def send_to_edge_coap(protocol, message):
 
     request = Message(
@@ -61,6 +78,10 @@ async def send_to_edge_coap(protocol, message):
         print(f"COAP DEVICE : Erreur : {error}")
 
 
+# ==========================================
+# 3. COMMUNICATION MQTT-SN
+# ==========================================
+
 async def send_to_edge_mqttsn(client, message):
     """Publie une mesure IoT via MQTT-SN."""
 
@@ -84,6 +105,10 @@ async def send_to_edge_mqttsn(client, message):
         )
 
 
+# ==========================================
+# 4. COMMUNICATION TCP
+# ==========================================
+
 def send_to_edge(message):
     """Envoie un message JSON au serveur Edge via TCP."""
 
@@ -94,7 +119,6 @@ def send_to_edge(message):
         ) as client:
 
             data = json.dumps(message) + "\n"
-
             client.sendall(data.encode("utf-8"))
 
             print(
@@ -105,6 +129,10 @@ def send_to_edge(message):
     except OSError as error:
         print(f"DEVICE : Erreur réseau : {error}")
 
+
+# ==========================================
+# 5. CREATION DES MESSAGES
+# ==========================================
 
 def create_message(device_id, temperature, anomaly):
 
@@ -132,14 +160,18 @@ def create_message(device_id, temperature, anomaly):
     return message
 
 
+# ==========================================
+# 6. SIMULATION DES CAPTEURS ET ML
+# ==========================================
+
 def simulate_device(device_id, iteration):
 
-    # Scénario FDI : fausse température plausible
+    # Scénario FDI : température falsifiée
     if device_id == "node-02" and iteration == 5:
         temperature = 32.5
         vibration = 0.3
 
-    # Scénario de surchauffe sur node-03
+    # Scénario de surchauffe
     elif device_id == "node-03" and iteration == 8:
         temperature = 40.0
         vibration = 1.1
@@ -149,13 +181,13 @@ def simulate_device(device_id, iteration):
         temperature = round(random.uniform(24, 26), 2)
         vibration = round(random.uniform(0.1, 0.5), 3)
 
-    # Préparer les données pour le modèle ML
+    # Préparation des données ML
     features = pd.DataFrame(
         [[temperature, vibration]],
         columns=["temperature", "vibration"]
     )
 
-    # Prédiction locale
+    # Mesure de la latence ML
     start_time = time.perf_counter()
 
     prediction = int(model.predict(features)[0])
@@ -169,28 +201,39 @@ def simulate_device(device_id, iteration):
     if anomaly:
         device_states[device_id] = "SAFE_MODE"
 
-    message = create_message(device_id, temperature, anomaly)
+    message = create_message(
+        device_id,
+        temperature,
+        anomaly
+    )
 
-    # Ajouter les informations ML au message
+    # Informations ML
     message["payload"]["vibration"] = vibration
     message["payload"]["prediction"] = prediction
-    message["payload"]["inference_ms"] = round(inference_ms, 4)
+    message["payload"]["inference_ms"] = round(
+        inference_ms, 4
+    )
 
     return message
 
 
-
-latencies = []
-
-
+# ==========================================
+# 7. EXECUTION DE LA SIMULATION
+# ==========================================
 
 async def run_simulation():
 
-    # Un client MQTT-SN pour chaque capteur simulé
+    # Identifiant unique de cette exécution
+    session_id = str(uuid.uuid4())
+
+    print(f"\n===== SESSION : {session_id} =====")
+
     clients = {}
 
     try:
+        # Un client MQTT-SN pour chaque capteur
         for device in devices:
+
             client = MqttSnClient(client_id=device)
 
             await client.connect(
@@ -209,11 +252,14 @@ async def run_simulation():
 
                 message = simulate_device(device, i)
 
+                # Identifier la session et l'itération
+                message["session_id"] = session_id
+                message["iteration"] = i + 1
+
+                # Enregistrer la latence ML
                 latencies.append(
                     message["payload"]["inference_ms"]
                 )
-
-                message["iteration"] = i + 1
 
                 # Transmission MQTT-SN
                 await send_to_edge_mqttsn(
@@ -227,34 +273,41 @@ async def run_simulation():
         for client in clients.values():
             await client.close()
 
-
-asyncio.run(run_simulation())
-
+    return session_id
 
 
-from statistics import mean
-import math
+# ==========================================
+# 8. RAPPORT DE PERFORMANCE
+# ==========================================
 
-# Trier les latences
+session_id = asyncio.run(run_simulation())
+
 sorted_latencies = sorted(latencies)
 
-# Calculer le percentile P95 (nearest rank)
-p95_index = math.ceil(0.95 * len(sorted_latencies)) - 1
+p95_index = math.ceil(
+    0.95 * len(sorted_latencies)
+) - 1
 
 report = {
+    "session_id": session_id,
     "total_predictions": len(latencies),
     "average_latency_ms": round(mean(latencies), 4),
     "max_latency_ms": round(max(latencies), 4),
-    "p95_latency_ms": round(sorted_latencies[p95_index], 4),
+    "p95_latency_ms": round(
+        sorted_latencies[p95_index], 4
+    ),
     "model_size_bytes": MODEL_FILE.stat().st_size
 }
 
-# Enregistrer le rapport
 report_file = BASE_DIR / "data" / "performance_report.json"
+
+report_file.parent.mkdir(
+    parents=True,
+    exist_ok=True
+)
 
 with open(report_file, "w", encoding="utf-8") as file:
     json.dump(report, file, indent=4)
 
 print("\n===== RAPPORT DE PERFORMANCE =====")
 print(json.dumps(report, indent=4))
-
