@@ -1,4 +1,4 @@
-
+from datetime import datetime, timezone
 import asyncio
 import json
 import logging
@@ -12,7 +12,13 @@ TOPIC = "aiot/telemetry/+"
 
 # Delai maximal pour completer une iteration
 ITERATION_TIMEOUT_SECONDS = 5
+# Parametres du nettoyage memoire
+MESSAGE_RETENTION_SECONDS = 300
+CLEANUP_INTERVAL_SECONDS = 30
 
+# Parametres de verification des horodatages
+MAX_MESSAGE_AGE_SECONDS = 300
+MAX_CLOCK_SKEW_SECONDS = 5
 # Date de reception du premier message de chaque groupe
 iteration_start_times = {}
 
@@ -20,11 +26,41 @@ EXPECTED_DEVICES = {"node-01", "node-02", "node-03"}
 
 # Messages regroupés par numéro d'itération
 pending_iterations = {}
-# Identifiants des messages deja traites
-processed_message_ids = set()
 
-# Iterations deja analysees
-completed_iterations = set()
+# Messages deja traites : message_id -> horodatage
+processed_message_ids = {}
+
+# Iterations terminees : (session_id, iteration) -> horodatage
+completed_iterations = {}
+
+def is_message_fresh(message):
+    """Verifie si l'horodatage du message est acceptable."""
+
+    timestamp = message.get("ts")
+
+    if not isinstance(timestamp, str):
+        return False
+
+    try:
+        message_time = datetime.fromisoformat(
+            timestamp.replace("Z", "+00:00")
+        )
+
+        # Refuser les dates sans fuseau horaire
+        if message_time.tzinfo is None:
+            return False
+
+        now = datetime.now(timezone.utc)
+        age = (now - message_time).total_seconds()
+
+        return (
+            -MAX_CLOCK_SKEW_SECONDS
+            <= age
+            <= MAX_MESSAGE_AGE_SECONDS
+        )
+
+    except ValueError:
+        return False
 
 
 async def monitor_timeouts():
@@ -72,7 +108,13 @@ async def monitor_timeouts():
 async def on_message(topic, data):
     try:
         message = json.loads(data.decode("utf-8"))
-
+        # Verifier la fraicheur du message avant son traitement
+        if not is_message_fresh(message):
+            print(
+                "EDGE MQTT : Message rejete "
+                "(horodatage absent, invalide ou expire)"
+            )
+            return
         device_id = message["src"]["agent"]
         iteration = message["iteration"]
         session_id = message["session_id"]
@@ -113,7 +155,7 @@ async def on_message(topic, data):
             return
 
         # 5. Memoriser le message avant son traitement
-        processed_message_ids.add(message_id)
+        processed_message_ids[message_id] = time.monotonic()
 
         # 6. Traiter la mesure individuelle
         process_message(message)
@@ -130,7 +172,7 @@ async def on_message(topic, data):
 
             analyze_devices(list(batch.values()))
 
-            completed_iterations.add(key)
+            completed_iterations[key] = time.monotonic()
 
             # Nettoyer les donnees temporaires
             del pending_iterations[key]
@@ -138,6 +180,51 @@ async def on_message(topic, data):
 
     except (ValueError, KeyError, TypeError) as error:
         print(f"EDGE MQTT : Message invalide : {error}")
+
+
+async def cleanup_expired_entries():
+    """Nettoie periodiquement les identifiants expires."""
+
+    while True:
+        await asyncio.sleep(CLEANUP_INTERVAL_SECONDS)
+
+        current_time = time.monotonic()
+
+        # 1. Supprimer les identifiants de messages expires
+        expired_messages = [
+            message_id
+            for message_id, timestamp
+            in processed_message_ids.items()
+            if current_time - timestamp
+            >= MESSAGE_RETENTION_SECONDS
+        ]
+
+        for message_id in expired_messages:
+            del processed_message_ids[message_id]
+
+        # 2. Supprimer les iterations terminees expirees
+        expired_iterations = [
+            key
+            for key, timestamp
+            in completed_iterations.items()
+            if current_time - timestamp
+            >= MESSAGE_RETENTION_SECONDS
+        ]
+
+        for key in expired_iterations:
+            del completed_iterations[key]
+
+        print(
+            f"EDGE MQTT : Nettoyage termine - "
+            f"{len(expired_messages)} messages supprimes, "
+            f"{len(expired_iterations)} iterations supprimees"
+        )
+
+        print(
+            f"EDGE MQTT : Memoire actuelle - "
+            f"{len(processed_message_ids)} messages, "
+            f"{len(completed_iterations)} iterations"
+        )
 
 
 async def main():
@@ -152,31 +239,47 @@ async def main():
     await bus.subscribe(TOPIC, on_message)
     await bus.start()
 
-    # Demarrer la surveillance des timeouts
-    timeout_task = asyncio.create_task(monitor_timeouts())
+    # Demarrer les taches de surveillance
+    timeout_task = asyncio.create_task(
+        monitor_timeouts()
+    )
+
+    cleanup_task = asyncio.create_task(
+        cleanup_expired_entries()
+    )
 
     print("EDGE MQTT : En attente des mesures IoT...")
     print(
         f"EDGE MQTT : Timeout configure a "
         f"{ITERATION_TIMEOUT_SECONDS} secondes"
     )
+    print(
+        f"EDGE MQTT : Nettoyage toutes les "
+        f"{CLEANUP_INTERVAL_SECONDS} secondes"
+    )
 
     try:
         await asyncio.Event().wait()
 
     finally:
-        # Arreter proprement la surveillance
+        # Arreter les deux taches
         timeout_task.cancel()
+        cleanup_task.cancel()
 
-        try:
-            await timeout_task
-        except asyncio.CancelledError:
-            pass
+        await asyncio.gather(
+            timeout_task,
+            cleanup_task,
+            return_exceptions=True
+        )
 
         # Fermer la connexion MQTT
         await bus.close()
 
         print("EDGE MQTT : Arret propre termine")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 if __name__ == "__main__":
     asyncio.run(main())
