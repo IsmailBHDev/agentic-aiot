@@ -43,7 +43,7 @@ EDGE_PORT = 5000
 COAP_URL = "coap://127.0.0.1:5683/telemetry"
 
 MQTTSN_HOST = "127.0.0.1"
-MQTTSN_PORT = 10001
+MQTTSN_PORT = 10000
 
 latencies = []
 
