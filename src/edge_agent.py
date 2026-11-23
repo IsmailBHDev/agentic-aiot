@@ -2,6 +2,7 @@
 import json
 import uuid
 from datetime import datetime, timezone
+from math import isfinite
 from pathlib import Path
 from statistics import median
 
@@ -13,7 +14,7 @@ INCIDENT_FILE = DATA_DIR / "incidents.jsonl"
 isolated_devices_by_session = {}
 
 # Seuil d'incoherence entre les capteurs
-DIFFERENCE_THRESHOLD = 5
+DIFFERENCE_THRESHOLD = 2.50
 
 
 def get_isolated_devices(session_id):
@@ -100,51 +101,80 @@ def process_message(message):
         print(f"EDGE : {device_id} est déjà isolé")
 
 
-def analyze_devices(messages):
-    """Analyse collaborative des capteurs d'une session."""
+def calculate_b2(messages):
+    """Retourne la médiane et les décisions B2 pour trois mesures synchronisées."""
+    if len(messages) != 3:
+        raise ValueError("B2 requiert trois mesures")
 
-    if not messages:
-        return
-
-    session_id = messages[0]["session_id"]
-
-    # Protection contre le melange des sessions
-    if any(
-        message["session_id"] != session_id
-        for message in messages
-    ):
-        raise ValueError(
-            "Analyse impossible : sessions differentes"
-        )
-
-    isolated_devices = get_isolated_devices(session_id)
-
-    # Conserver uniquement les noeuds non isoles
-    temperatures = {}
-
+    group_keys = set()
+    payloads = {}
     for message in messages:
-        device_id = message["src"]["agent"]
+        try:
+            session_id = message["session_id"]
+            iteration = message["iteration"]
+            device_id = message["src"]["agent"]
+            payload = message["payload"]
+            temperature = payload["temperature"]
+            prediction = payload["prediction"]
+        except (KeyError, TypeError) as error:
+            raise ValueError("Mesure B2 incomplete ou mal formee") from error
 
-        if device_id not in isolated_devices:
-            temperatures[device_id] = (
-                message["payload"]["temperature"]
-            )
+        if not isinstance(session_id, str) or not session_id.strip():
+            raise ValueError("Identifiant de session B2 invalide")
+        if type(iteration) is not int or iteration < 0:
+            raise ValueError("Iteration B2 invalide")
+        if not isinstance(device_id, str) or not device_id.strip():
+            raise ValueError("Identifiant de capteur B2 invalide")
+        try:
+            valid_temperature = type(temperature) in (int, float) and isfinite(temperature)
+        except OverflowError:
+            valid_temperature = False
+        if not valid_temperature:
+            raise ValueError("Temperature B2 invalide")
+        if type(prediction) is not int or prediction not in (0, 1):
+            raise ValueError("Prediction B1 invalide")
+        if device_id in payloads:
+            raise ValueError("B2 requiert trois capteurs distincts")
 
-    if len(temperatures) < 3:
-        print("EDGE : Moins de 3 nœuds actifs")
-        print("EDGE : Analyse collective suspendue")
+        group_keys.add((session_id, iteration))
+        payloads[device_id] = payload
+
+    if len(group_keys) != 1:
+        raise ValueError("B2 requiert une session et une iteration communes")
+
+    reference = median(payload["temperature"] for payload in payloads.values())
+    decisions = {}
+    for device_id, payload in payloads.items():
+        signed_deviation = payload["temperature"] - reference
+        deviation = abs(signed_deviation)
+        collaborative_alert = deviation > DIFFERENCE_THRESHOLD
+        b1_prediction = payload["prediction"]
+        decisions[device_id] = {
+            "temperature": payload["temperature"],
+            "reference": reference,
+            "signed_deviation": signed_deviation,
+            "deviation": deviation,
+            "b1_prediction": b1_prediction,
+            "collaborative_alert": collaborative_alert,
+            "b2_prediction": b1_prediction == 1 or collaborative_alert,
+        }
+
+    return reference, decisions
+
+
+def analyze_devices(messages):
+    """Calcule B2, puis applique la politique d'isolement de la session."""
+    if len(messages) < 3:
         return
 
-    # Calcul de la temperature mediane
-    reference = median(temperatures.values())
+    reference, decisions = calculate_b2(messages)
+    session_id = messages[0]["session_id"]
+    isolated_devices = get_isolated_devices(session_id)
 
     print(f"\nEDGE : Médiane = {reference:.2f} °C")
 
-    for device_id, temperature in temperatures.items():
-
-        difference = abs(temperature - reference)
-
-        if difference > DIFFERENCE_THRESHOLD:
+    for device_id, decision in decisions.items():
+        if decision["collaborative_alert"] and device_id not in isolated_devices:
 
             print(
                 f"EDGE : Incohérence détectée sur {device_id}"
@@ -152,7 +182,7 @@ def analyze_devices(messages):
 
             save_incident(
                 device_id,
-                temperature,
+                decision["temperature"],
                 reference,
                 "SENSOR_INCONSISTENCY",
                 session_id
@@ -160,5 +190,4 @@ def analyze_devices(messages):
 
             isolate_device(device_id, session_id)
 
-        else:
-            print(f"EDGE : {device_id} cohérent")
+    return reference, decisions
