@@ -1,5 +1,6 @@
 
 import json
+import os
 import uuid
 from datetime import datetime, timezone
 from math import isfinite
@@ -8,7 +9,9 @@ from statistics import median
 
 # Chemin du fichier d'incidents
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-INCIDENT_FILE = DATA_DIR / "incidents.jsonl"
+INCIDENT_FILE = Path(os.environ.get(
+    "AIOT_EDGE_INCIDENT_FILE", str(DATA_DIR / "incidents.jsonl")
+))
 
 # Noeuds isoles independants pour chaque session
 isolated_devices_by_session = {}
@@ -27,9 +30,11 @@ def save_incident(
     temperature,
     reference,
     reason,
-    session_id
+    session_id,
+    *,
+    iteration=None
 ):
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    INCIDENT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
     incident = {
         "id": str(uuid.uuid4()),
@@ -45,6 +50,8 @@ def save_incident(
             else "SAFE_MODE_REPORTED"
         )
     }
+    if iteration is not None:
+        incident["iteration"] = iteration
 
     with open(INCIDENT_FILE, "a", encoding="utf-8") as file:
         file.write(json.dumps(incident) + "\n")
@@ -94,7 +101,8 @@ def process_message(message):
             temperature,
             None,
             "LOCAL_ML_ANOMALY",
-            session_id
+            session_id,
+            iteration=message.get("iteration")
         )
 
     if device_id in isolated_devices:
@@ -185,7 +193,8 @@ def analyze_devices(messages):
                 decision["temperature"],
                 reference,
                 "SENSOR_INCONSISTENCY",
-                session_id
+                session_id,
+                iteration=messages[0]["iteration"]
             )
 
             isolate_device(device_id, session_id)

@@ -2,6 +2,7 @@
 """Orchestrateur Cloud : transmission des incidents vers A2A."""
 from datetime import datetime, timezone
 import json
+import os
 import uuid
 from pathlib import Path
 import argparse
@@ -9,10 +10,14 @@ import time
 import httpx
 
 BASE_DIR = Path(__file__).resolve().parents[1]
-INCIDENTS_FILE = BASE_DIR / "data" / "cloud_incidents.jsonl"
-DECISIONS_FILE = BASE_DIR / "data" / "cloud_decisions.jsonl"
+INCIDENTS_FILE = Path(os.environ.get(
+    "AIOT_CLOUD_INCIDENT_FILE", str(BASE_DIR / "data" / "cloud_incidents.jsonl")
+))
+DECISIONS_FILE = Path(os.environ.get(
+    "AIOT_CLOUD_DECISION_FILE", str(BASE_DIR / "data" / "cloud_decisions.jsonl")
+))
 
-A2A_URL = "http://127.0.0.1:9000/"
+A2A_URL = os.environ.get("AIOT_A2A_URL", "http://127.0.0.1:9000/")
 
 
 def send_to_a2a(incident: dict) -> dict:
@@ -50,7 +55,7 @@ def send_to_a2a(incident: dict) -> dict:
     return result
 
 
-def save_decision(response: dict) -> dict:
+def save_decision(response: dict, expected_incident_id=None) -> dict:
     """Extrait et enregistre une décision reçue via A2A."""
 
     result = response["result"]
@@ -66,6 +71,8 @@ def save_decision(response: dict) -> dict:
 
     if not analysis.get("cloud_incident_id"):
         raise ValueError("Missing cloud_incident_id")
+    if expected_incident_id is not None and analysis["cloud_incident_id"] != expected_incident_id:
+        raise ValueError("A2A response references a different Cloud incident")
 
     decision = {
         **analysis,
@@ -149,7 +156,7 @@ def process_pending_incidents():
 
         try:
             response = send_to_a2a(incident)
-            decision = save_decision(response)
+            decision = save_decision(response, expected_incident_id=incident_id)
 
             processed_ids.add(incident_id)
             processed_count += 1

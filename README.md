@@ -63,6 +63,31 @@ Run the simulation:
 python src/device_simulator.py
 ```
 
+The simulator sends telemetry through MQTT-SN and the MQTT gateway. CoAP
+telemetry uses the CoAP server and can be exercised with the CoAP client.
+The TCP server in src/edge_server.py is a historical entry point outside
+the active simulation and the B2/B3 experimental results.
+
+### Collection metrics
+
+MQTT and CoAP log cumulative counters every 30 seconds. The counters cover
+received and invalid messages, duplicate deliveries, messages for closed
+batches, completed batches and expired batches. Each batch has a five-second
+collection window, measured from the first accepted observation. The
+assembly-time total in seconds divided by the completed-batch count gives the
+mean time from the first to the third accepted observation. The number of
+observations missing at timeout measures the collection shortfall, which can
+include delayed messages as well as losses. The tests simulate this shortfall
+by withholding messages until the deadline.
+
+Run the transport checks against a local Mosquitto broker and an ephemeral
+CoAP endpoint from PowerShell:
+
+```powershell
+$env:AIOT_TEST_NETWORK = '1'
+python -m pytest tests/test_edge_b2.py -k transport_retries
+```
+
 ## Roadmap
 
 - MQTT-SN and CoAP communication
