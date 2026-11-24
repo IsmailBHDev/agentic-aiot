@@ -268,7 +268,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
 - [x] **IOT-176 — Signer les modèles distribués** Réf. : `src/model_signing.py` (fichier `<modèle>.sig`, vérification avant `joblib.load`, activée par `AIOT_MODEL_SIGNING`), chargement du simulateur via `load_model`, `tests/test_model_signing.py` (10 tests : modèle modifié, remplacé, non signé ou mal algorithmé refusé sans chargement). La distribution OTA elle-même reste à faire dans IOT-158.
   1. Le Cloud signe chaque modèle publié.
   2. Le capteur simulé refuse un modèle non signé ou modifié.
-- [ ] **IOT-177 — Établir le canal Edge–Cloud avec ML-KEM**
+- [x] **IOT-177 — Établir le canal Edge–Cloud avec ML-KEM** Réf. : `src/secure_channel.py` (modes `x25519`, `ml-kem-768` et hybride `x25519+ml-kem-768` via `AIOT_CHANNEL_MODE` ; HKDF-SHA256, AES-256-GCM, incident signé par l'Edge en Ed25519 ou ML-DSA-44, rejeu refusé), scellement dans `src/edge_cloud_bridge.py`, ouverture dans `src/cloud_store.py`, `tests/test_secure_channel.py` (23 tests). Le passage réel par MCP reste à valider avec `AIOT_TEST_NETWORK=1`.
   1. Échanger une clé de session ML-KEM, puis chiffrer les incidents.
   2. Option : version hybride classique + post-quantique.
 - [ ] **IOT-178 — Mesurer le coût**
