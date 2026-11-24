@@ -276,7 +276,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
   2. Temps de signature et de vérification sur 1 000 opérations.
   3. Latence Edge → décision et octets par incident avec le banc B3 (3 répétitions), pour C0, C1, C2 et C3.
   4. Comparer aux ordres de grandeur publiés (section 2.1 du rapport).
-- [ ] **IOT-179 — Rédiger les résultats : section 6.5, discussion de H4 à H6, menaces à la validité.**
+- [x] **IOT-179 — Rédiger les résultats : section 6.5, discussion de H4 à H6, menaces à la validité.** Réf. : [`docs/pq_results.md`](pq_results.md) (utilisation, reproduction, résultats) ; rapport mis à jour (sections 5.6, 6.5, 7 et 9). H4 soutenue pour le calcul, H5 soutenue en simulation, H6 non testée (FN-DSA reporté).
 
 ### E12 — Résilience et performances
 
