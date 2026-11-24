@@ -265,7 +265,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
   1. Reprendre le scénario E07 « deux capteurs décalés de +3,5 °C » comme injection par un attaquant.
   2. Mesurer les faux positifs et les anomalies manquées de B2 en C0, puis en C2.
   3. Enregistrer dans un nouveau fichier de résultats daté.
-- [ ] **IOT-176 — Signer les modèles OTA (lié à IOT-158)**
+- [x] **IOT-176 — Signer les modèles distribués** Réf. : `src/model_signing.py` (fichier `<modèle>.sig`, vérification avant `joblib.load`, activée par `AIOT_MODEL_SIGNING`), chargement du simulateur via `load_model`, `tests/test_model_signing.py` (10 tests : modèle modifié, remplacé, non signé ou mal algorithmé refusé sans chargement). La distribution OTA elle-même reste à faire dans IOT-158.
   1. Le Cloud signe chaque modèle publié.
   2. Le capteur simulé refuse un modèle non signé ou modifié.
 - [ ] **IOT-177 — Établir le canal Edge–Cloud avec ML-KEM**

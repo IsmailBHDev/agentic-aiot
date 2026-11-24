@@ -15,6 +15,7 @@ import pandas as pd
 from aiocoap import Context, Message, POST
 from mqttsn import MqttSnClient
 from message_auth import NO_AUTH, auth_mode, load_signer
+from model_signing import load_model
 
 
 # ==========================================
@@ -34,7 +35,8 @@ device_states = {
 BASE_DIR = Path(__file__).resolve().parent.parent
 MODEL_FILE = BASE_DIR / "models" / "device_model.joblib"
 
-model = joblib.load(MODEL_FILE)
+# IOT-176 : signature vérifiée avant chargement si AIOT_MODEL_SIGNING est actif
+model = load_model(MODEL_FILE)
 
 print("Modèle ML chargé avec succès")
 
