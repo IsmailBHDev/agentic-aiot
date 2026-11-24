@@ -20,23 +20,16 @@ DETECTION = ("tp", "fp", "fn", "tn", "no_decision")
 
 @pytest.fixture(scope="module")
 def results(tmp_path_factory):
-    saved = {name: getattr(mqtt_edge_adapter, name) for name in (
-        *evaluate_pq_attacks.STATE, "collection_metrics", "message_verifier", "analyze_devices",
-    )}
-    saved_edge = {name: getattr(edge_agent, name) for name in (
-        "DATA_DIR", "INCIDENT_FILE", "isolated_devices_by_session",
-    )}
-    try:
-        yield evaluate_pq_attacks.evaluate(limit=20, workdir=tmp_path_factory.mktemp("attacks"))
-    finally:
-        for name, value in saved.items():
-            setattr(mqtt_edge_adapter, name, value)
-        for name, value in saved_edge.items():
-            setattr(edge_agent, name, value)
+    return evaluate_pq_attacks.evaluate(limit=20, workdir=tmp_path_factory.mktemp("attacks"))
 
 
 def detection(metrics):
     return {key: metrics[key] for key in DETECTION}
+
+
+def test_evaluation_restores_the_edge_state(results):
+    assert mqtt_edge_adapter.message_verifier is None
+    assert mqtt_edge_adapter.analyze_devices is edge_agent.analyze_devices
 
 
 def test_signatures_do_not_change_the_baseline(results):

@@ -236,7 +236,30 @@ async def scenario_fake_alerts(run):
         await run.send(run.forged(alert))
 
 
+@contextlib.contextmanager
+def edge_sandbox():
+    """Restaure l'état global de l'Edge après un rejeu (tests et mesures)."""
+    saved_adapter = {name: getattr(mqtt_edge_adapter, name) for name in (
+        *STATE, "collection_metrics", "message_verifier", "analyze_devices",
+    )}
+    saved_edge = {name: getattr(edge_agent, name) for name in (
+        "DATA_DIR", "INCIDENT_FILE", "isolated_devices_by_session",
+    )}
+    try:
+        yield
+    finally:
+        for name, value in saved_adapter.items():
+            setattr(mqtt_edge_adapter, name, value)
+        for name, value in saved_edge.items():
+            setattr(edge_agent, name, value)
+
+
 def evaluate(limit=None, workdir=None):
+    with edge_sandbox():
+        return _evaluate(limit, workdir)
+
+
+def _evaluate(limit=None, workdir=None):
     groups = load_reference(limit)
     results = {"baseline": {}, "S1_forged_pair": {}, "S2_replay": {}, "S3_fake_alerts": {}}
     # Les impressions de l'Edge sont masquées pendant les rejeux.

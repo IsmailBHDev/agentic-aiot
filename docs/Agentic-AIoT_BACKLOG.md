@@ -271,7 +271,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
 - [x] **IOT-177 — Établir le canal Edge–Cloud avec ML-KEM** Réf. : `src/secure_channel.py` (modes `x25519`, `ml-kem-768` et hybride `x25519+ml-kem-768` via `AIOT_CHANNEL_MODE` ; HKDF-SHA256, AES-256-GCM, incident signé par l'Edge en Ed25519 ou ML-DSA-44, rejeu refusé), scellement dans `src/edge_cloud_bridge.py`, ouverture dans `src/cloud_store.py`, `tests/test_secure_channel.py` (23 tests). Le passage réel par MCP reste à valider avec `AIOT_TEST_NETWORK=1`.
   1. Échanger une clé de session ML-KEM, puis chiffrer les incidents.
   2. Option : version hybride classique + post-quantique.
-- [ ] **IOT-178 — Mesurer le coût**
+- [~] **IOT-178 — Mesurer le coût** Réf. : `src/evaluate_pq_cost.py`, `results/pq_cost_2026-11-23.json`, `tests/test_pq_cost.py`. Mesures hors réseau : primitives sur 1 000 opérations, tailles des messages et incidents scellés, traitement Edge sur 5 × 600 messages. Message de télémétrie : 356 octets en clair, 508 avec Ed25519, 3 650 avec ML-DSA-44 (× 10,25). Calcul ajouté inférieur à 1 ms par message ou incident. Reste : latence du banc B3 en réseau local avec `AIOT_TEST_NETWORK=1`, et mesures dans l'environnement de référence Windows.
   1. Tailles des clés, des signatures et des messages.
   2. Temps de signature et de vérification sur 1 000 opérations.
   3. Latence Edge → décision et octets par incident avec le banc B3 (3 répétitions), pour C0, C1, C2 et C3.
