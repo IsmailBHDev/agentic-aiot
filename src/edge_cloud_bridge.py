@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 
 from mcp import ClientSession
-from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.streamable_http import streamable_http_client
 
 DEFAULT_INCIDENTS = (
     Path(__file__).resolve().parents[1]
@@ -18,7 +18,7 @@ DEFAULT_INCIDENTS = (
 
 
 async def send_mcp(incident, url):
-    async with streamablehttp_client(url) as (read, write, _):
+    async with streamable_http_client(url) as (read, write, _):
         async with ClientSession(read, write) as session:
             await session.initialize()
 

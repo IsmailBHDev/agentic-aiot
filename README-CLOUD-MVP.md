@@ -29,7 +29,6 @@ démarrer Mosquitto.
 
 ~~~powershell
 python -m pip install -r requirements.txt
-python -m pip install mcp fastapi uvicorn httpx pytest
 docker compose up -d mosquitto
 ~~~
 

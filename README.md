@@ -88,6 +88,13 @@ $env:AIOT_TEST_NETWORK = '1'
 python -m pytest tests/test_edge_b2.py -k transport_retries
 ```
 
+## Research and reproduction
+
+- [Report figures, algorithms and one-session demo](docs/research_delivery.md)
+- [Frozen and multi-session detection protocols](docs/experimental_protocol.md)
+- [Cloud and B3 evaluation](README-CLOUD-MVP.md)
+- [Literature review](docs/literature_review.md)
+
 ## Roadmap
 
 - MQTT-SN and CoAP communication
@@ -99,4 +106,6 @@ python -m pytest tests/test_edge_b2.py -k transport_retries
 
 ## Project Status
 
-Academic proof of concept under active development. The current implementation runs locally in Python; hardware deployment and real network communication are not yet implemented.
+Academic software prototype. Integration tests exercise MQTT-SN, MQTT, CoAP,
+MCP and A2A over loopback. The experimental evaluation uses simulated sensor
+inputs and does not include a hardware deployment.

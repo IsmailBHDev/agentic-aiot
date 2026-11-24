@@ -232,6 +232,7 @@ def test_b3_replay_mqttsn_and_coap(tmp_path, monkeypatch, run_number):
         "LOCAL_ML_ANOMALY": 1,
         "COAP_UNKNOWN": 1,
     }
+    example_sessions = {"mqtt-sn-session-0", "coap-session-0"}
     latencies = []
     for decision in decisions:
         stored = cloud[decision["cloud_incident_id"]]
@@ -246,6 +247,19 @@ def test_b3_replay_mqttsn_and_coap(tmp_path, monkeypatch, run_number):
         if incident["reason"] == "SENSOR_INCONSISTENCY":
             assert incident["temperature"] - incident["reference"] == 3.0
             assert incident["iteration"] == 1
+        if incident["session_id"] in example_sessions:
+            print("B3_TRACE " + json.dumps({
+                "session_id": incident["session_id"],
+                "iteration": incident["iteration"],
+                "device_id": incident["device_id"],
+                "temperature": incident["temperature"],
+                "reference": incident["reference"],
+                "edge_incident_id": incident["id"],
+                "cloud_incident_id": decision["cloud_incident_id"],
+                "reason": decision["reason"],
+                "severity": decision["severity"],
+                "recommendation": decision["recommendation"],
+            }))
         edge_at, cloud_at, decision_at = map(datetime.fromisoformat, (
             incident["timestamp"], stored["cloud_received_at"], decision["decision_timestamp"],
         ))
