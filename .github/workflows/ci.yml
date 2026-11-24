@@ -1,0 +1,45 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    env:
+      AIOT_TEST_NETWORK: '0'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+          cache: pip
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt ruff==0.17.6
+      - name: Verify dependencies and frozen inputs
+        run: |
+          python -m pip check
+          python src/verify_reproduction.py
+      - name: Lint and compile
+        run: |
+          python -m ruff check --select E9,F63,F7,F82 src tests
+          python -m compileall -q src tests
+      - name: Run offline tests
+        run: python -m pytest -p no:cacheprovider --junitxml=test-results.xml tests
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}
+          path: test-results.xml
+          if-no-files-found: ignore

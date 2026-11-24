@@ -1,0 +1,29 @@
+{
+  "release": "experiment-2026-11-23",
+  "historical_seed": 42,
+  "historical_b2_threshold_celsius": 2.5,
+  "e07_source_commit": "86de07a1383c81847c53153072d3293dad53cd77",
+  "b3_source_commit": "2f491b9d7767644b5ad930e089878b8ff1bf1d7e",
+  "sha256": {
+    ".github/workflows/ci.yml": "d96625e115918036be331b04912623f5dfb361471550b1ae92911706c9fb396f",
+    ".python-version": "3a55324cbeddc91df012407d051dad08c88624c95a82fbdb856728729fbd14ab",
+    "requirements.txt": "d0452c762dea4960e80a91cf2fc7a1279ac96069fe82e19efeb2360d8fb1ffec",
+    "requirements-figures.txt": "2976cfeb6b7def5f3cd019da1901319a416ced4ff2ac926347a4c50608634d77",
+    "data/collaborative_dataset.csv": "c21344ae368b51aba3069e475b9debd02216396cf66a77c235e2dc5be9d3fd34",
+    "data/collaborative_train.csv": "e6ce80442478e9d547c80a5ad9c8403ad229f99ab5590670ff0b7f99fae196fa",
+    "data/collaborative_test.csv": "75a4807ce36cfa49a25d5837a6e97a9a66cc24f0e53f560a308fca11551e3169",
+    "data/b2_train.csv": "02c85cf69b84a9b77c197d834499552e32db290722bac41220abbaade1105820",
+    "data/b2_validation.csv": "4c860cfc20f2ac89351c1b9634b7adf6199685882884ea1ef7abcf419a8f5920",
+    "models/device_model.joblib": "1986a97f363dd027920a3eff2fa6c3518b3f661049c9164c9472c35e10995eb4",
+    "results/baseline_b1_predictions.csv": "7823619dcf44d178847ff8c30dc77a1862b2bebf1a2cb7a701516ce42718fbb3",
+    "results/collaborative_b2_predictions.csv": "c0bfc205fc45ae19220eaf763efdb59728166145f1e6d298587ad7a5576cc163",
+    "results/e07_synthetic_2026-11-23.json": "2140c9c32e09e7a57aa4deba077daffb932d9936eef792cdd7e2ea2b2defdd19",
+    "README-CLOUD-MVP.md": "b9f5f839dc7ad0729b662c027e27d0c401f13456021c4874dd859ddc7acb4909",
+    "docs/experimental_protocol.md": "0ab3ad834f1b73c7ac6b4c8653e387a67993790d58eed1b7a00ecb3d2d4d455e",
+    "docs/research_delivery.md": "45615a70f1409933a7eba03398a66b1642eabe191aed67eb8eafdec41bf6a6b7",
+    "docs/literature_review.md": "772fcdbd3149c46913d9683f7fc701edafed5c975661d4dfe6dde3757bd0a5ba",
+    "docs/figures/architecture.png": "bcb0e0fb5205a895c983049bc43e944f3947cc1bf60be8914397af7965f13245",
+    "docs/figures/confusion.png": "567290ed2fbe8fd5af1eecb9600288858c8326dc93d53c9c2391b127de1878b2",
+    "docs/figures/e07-f1.png": "49e7a81e6102e9adbb336cdfa1357c4262ca70338c885613115c0d88e86ca47d"
+  }
+}
