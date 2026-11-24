@@ -251,7 +251,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
   2. Distinguer attaquant classique et attaquant quantique (« récolter maintenant, déchiffrer plus tard »).
   3. Fixer ce qui est hors périmètre : capteur compromis avec sa clé privée.
   4. Reporter le résultat dans la section 5.6 du rapport.
-- [ ] **IOT-173 — Choisir la bibliothèque**
+- [~] **IOT-173 — Choisir la bibliothèque** Décision : `cryptography` 50.0.2, déjà épinglée, pour Ed25519, ML-DSA-44 (défaut) et ML-KEM-768 ; FN-DSA (C3) reporté et optionnel. Réf. : [`docs/pq_library_choice.md`](pq_library_choice.md), `tests/test_pq_primitives.py` (10 tests réussis sous Linux). Reste : confirmer Windows par la CI de la PR.
   1. Installer liboqs et son interface Python sous Windows et Linux ; noter les versions.
   2. Vérifier ML-DSA, ML-KEM et FN-DSA, plus Ed25519 comme référence classique.
   3. Mettre ces dépendances dans un fichier séparé pour ne pas casser la CI.
