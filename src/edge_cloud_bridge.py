@@ -4,6 +4,7 @@
 import argparse
 import asyncio
 import json
+import os
 from pathlib import Path
 
 from mcp import ClientSession
@@ -97,7 +98,7 @@ def main():
     parser.add_argument(
         "--file",
         type=Path,
-        default=DEFAULT_INCIDENTS
+        default=Path(os.environ.get("AIOT_EDGE_INCIDENT_FILE", str(DEFAULT_INCIDENTS)))
     )
 
     parser.add_argument(

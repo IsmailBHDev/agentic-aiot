@@ -15,6 +15,7 @@ async def send_telemetry():
     # Creer un message IoT
     message = {
         "v": 1,
+        "session_id": str(uuid.uuid4()),
         "iteration": 1,
         "id": str(uuid.uuid4()),
         "ts": datetime.now(timezone.utc).isoformat(),

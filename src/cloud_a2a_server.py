@@ -55,7 +55,7 @@ def analyze_incident(incident: dict) -> dict:
             "Escalate incident for further analysis."
         )
 
-    return {
+    analysis = {
         "cloud_incident_id": incident.get("cloud_incident_id"),
         "device_id": device_id,
         "reason": reason,
@@ -63,6 +63,12 @@ def analyze_incident(incident: dict) -> dict:
         "recommendation": recommendation,
         "analysis_method": "rule_based_v1"
     }
+    for field in ("session_id", "iteration", "temperature", "reference"):
+        if field in incident:
+            analysis[field] = incident[field]
+    if "id" in incident:
+        analysis["incident_id"] = incident["id"]
+    return analysis
 
 
 @app.post('/')

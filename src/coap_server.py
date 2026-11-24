@@ -1,6 +1,8 @@
 
 import asyncio
 import json
+import time
+from collections import Counter
 
 from aiocoap import resource, Message, Code, Context
 from edge_agent import (
@@ -8,11 +10,17 @@ from edge_agent import (
     analyze_devices,
     save_incident
 )
+from telemetry import (
+    CLEANUP_INTERVAL_SECONDS,
+    EXPECTED_DEVICES,
+    ITERATION_TIMEOUT_SECONDS,
+    MESSAGE_RETENTION_SECONDS,
+    is_message_fresh,
+    validate_telemetry,
+)
 
 HOST = "127.0.0.1"
 PORT = 5683
-
-pending_iterations = {}
 
 class HealthResource(resource.Resource):
 
@@ -26,59 +34,80 @@ class HealthResource(resource.Resource):
         )
 class TelemetryResource(resource.Resource):
 
+    def __init__(self):
+        super().__init__()
+        self.pending = {}
+        self.closed = {}
+        self.seen_ids = {}
+        self.collection_metrics = Counter()
+
+    def expire_batch(self, key, now):
+        started, batch = self.pending[key]
+        if now - started >= ITERATION_TIMEOUT_SECONDS:
+            del self.pending[key]
+            self.closed[key] = now
+            missing_devices = EXPECTED_DEVICES - batch.keys()
+            self.collection_metrics["batches_expired"] += 1
+            self.collection_metrics["observations_missing_at_timeout"] += len(missing_devices)
+            print(f"COAP EDGE : TIMEOUT {key}, capteurs manquants : "
+                  f"{sorted(missing_devices)}")
+
+    async def monitor_timeouts(self):
+        next_cleanup = time.monotonic() + CLEANUP_INTERVAL_SECONDS
+        while True:
+            await asyncio.sleep(1)
+            now = time.monotonic()
+            for key in list(self.pending):
+                self.expire_batch(key, now)
+            if now < next_cleanup:
+                continue
+            for records in (self.closed, self.seen_ids):
+                for key, timestamp in list(records.items()):
+                    if now - timestamp >= MESSAGE_RETENTION_SECONDS:
+                        del records[key]
+            print(f"COAP EDGE : Collecte {dict(self.collection_metrics)}")
+            next_cleanup = now + CLEANUP_INTERVAL_SECONDS
+
     async def render_post(self, request):
+        self.collection_metrics["messages_received"] += 1
         try:
             message = json.loads(
                 request.payload.decode("utf-8")
             )
 
-            device_id = message["src"]["agent"]
-            iteration = message["iteration"]
+            key, device_id, message_id = validate_telemetry(message)
+            if not is_message_fresh(message):
+                raise ValueError("Stale or invalid timestamp")
 
-            if device_id not in {
-                "node-01", "node-02", "node-03"
-            } or not isinstance(iteration, int):
-                return Message(
-                    code=Code.BAD_REQUEST,
-                    payload=b"Invalid device or iteration"
-                )
+            now = time.monotonic()
+            if key in self.pending:
+                self.expire_batch(key, now)
+            started, batch = self.pending.get(key, (now, {}))
+            if message_id in self.seen_ids or device_id in batch:
+                self.collection_metrics["messages_duplicate"] += 1
+                return Message(code=Code.CHANGED, payload=b"Telemetry already handled")
+            if key in self.closed:
+                self.collection_metrics["messages_closed_batch"] += 1
+                return Message(code=Code.CHANGED, payload=b"Telemetry already handled")
 
-            # Traitement individuel
             process_message(message)
-
-            # Regroupement par iteration
-            if iteration not in pending_iterations:
-                pending_iterations[iteration] = {}
-
-            pending_iterations[iteration][device_id] = message
-
-            print(
-                f"COAP EDGE : {device_id} recu "
-                f"({len(pending_iterations[iteration])}/3) "
-                f"iteration {iteration}"
-            )
-
-            if len(pending_iterations[iteration]) == 3:
-
-                print(
-                    f"\nCOAP EDGE : Analyse collective "
-                    f"iteration {iteration}"
-                )
-
-                messages = list(
-                    pending_iterations[iteration].values()
-                )
-
-                analyze_devices(messages)
-
-                del pending_iterations[iteration]
+            self.seen_ids[message_id] = now
+            batch[device_id] = message
+            self.pending[key] = (started, batch)
+            if batch.keys() == EXPECTED_DEVICES:
+                analyze_devices(list(batch.values()))
+                self.collection_metrics["batches_completed"] += 1
+                self.collection_metrics["batch_assembly_seconds_total"] += now - started
+                self.closed[key] = now
+                del self.pending[key]
 
             return Message(
                 code=Code.CHANGED,
                 payload=b"Telemetry processed"
             )
 
-        except (ValueError, KeyError, TypeError):
+        except (ValueError, KeyError, TypeError, OverflowError):
+            self.collection_metrics["messages_invalid"] += 1
             return Message(
                 code=Code.BAD_REQUEST,
                 payload=b"Invalid telemetry message"
@@ -151,6 +180,7 @@ class AlertResource(resource.Resource):
 async def main():
 
     root = resource.Site()
+    telemetry = TelemetryResource()
     root.add_resource(
         ["alert"],
         AlertResource()
@@ -161,7 +191,7 @@ async def main():
     )
     root.add_resource(
         ["telemetry"],
-        TelemetryResource()
+        telemetry
     )
 
     protocol = await Context.create_server_context(
@@ -174,9 +204,12 @@ async def main():
         f"coap://{HOST}:{PORT}/telemetry"
     )
 
+    timeout_task = asyncio.create_task(telemetry.monitor_timeouts())
     try:
         await asyncio.Event().wait()
     finally:
+        timeout_task.cancel()
+        await asyncio.gather(timeout_task, return_exceptions=True)
         await protocol.shutdown()
 
 

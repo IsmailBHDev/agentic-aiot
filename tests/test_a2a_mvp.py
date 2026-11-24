@@ -39,8 +39,13 @@ class A2ATests(unittest.TestCase):
 
     def test_message_send(self):
         incident = {
+            "id": "edge-001",
             "cloud_incident_id": "test-incident-001",
+            "session_id": "session-001",
+            "iteration": 4,
             "device_id": "node-02",
+            "temperature": 28.0,
+            "reference": 25.0,
             "reason": "SENSOR_INCONSISTENCY"
         }
 
@@ -79,6 +84,9 @@ class A2ATests(unittest.TestCase):
         )
 
         analysis = json.loads(analysis_text)
+        self.assertEqual(analysis["incident_id"], incident["id"])
+        for field in ("cloud_incident_id", "session_id", "iteration", "temperature", "reference"):
+            self.assertEqual(analysis[field], incident[field])
 
         self.assertEqual(
             analysis["device_id"],
