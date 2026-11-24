@@ -209,7 +209,7 @@ B2 est validée hors ligne et le test de parité reproduit les 600 décisions au
 - [x] **IOT-120 [P1] — Créer le rapport Google Docs.** Rapport français avec problématique, architecture, méthodologie et résultats. Réf. : `3dbf661` et `8cfb19a`, rapport Google Docs, sections 2 et 6 et annexes B/C.
 - [x] **IOT-121 [P1] — Documenter la validation du seuil B2 et les résultats B1/B2.** Annexes B/C du Google Docs. Réf. : `3dbf661` et `8cfb19a`, rapport Google Docs, sections 2 et 6 et annexes B/C.
 - [x] **IOT-122 [P1] — Documenter le faux négatif résiduel.** Annexe C.5. Réf. : `3dbf661` et `8cfb19a`, rapport Google Docs, sections 2 et 6 et annexes B/C.
-- [x] **IOT-123 [P1] — Consolider le rapport principal.** Les sections principales contiennent encore des passages antérieurs à B2 ; réconcilier avec annexes B/C et supprimer les contradictions. Réf. : PR #13, `8cfb19a`, guide de livraison et manifeste.
+- [x] **IOT-123 [P1] — Consolider le rapport principal.** Sections principales réconciliées avec les résultats B2, B3 et E07 ; passages antérieurs à B2 et contradictions avec les annexes B/C supprimés. Réf. : PR #13, `8cfb19a`, guide de livraison et manifeste.
 - [x] **IOT-124 [P1] — Décrire précisément l'architecture et les flux.** Schémas du flux MQTT-SN/CoAP → Edge → MCP → A2A, rôles et limites. Réf. : PR #13, `8cfb19a`, guide de livraison et manifeste.
 - [x] **IOT-125 [P1] — Documenter les algorithmes.** Pseudocode B1, B2 et politique d'incident B3 ; inclure `>` strict. Réf. : PR #13, `8cfb19a`, guide de livraison et manifeste.
 - [x] **IOT-126 [P1] — Compléter la méthodologie reproductible.** Variables, scénarios, splits, seuils, métriques, nombre d'exécutions, outils et versions. Réf. : PR #13, `8cfb19a`, guide de livraison et manifeste.
@@ -241,8 +241,8 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
 
 ### E11 — Reprise et gouvernance
 
-- [x] **IOT-150 — Réconcilier le backlog et archiver le plan B3.** État E00–E10 recoupé avec les commits et tests, épics E11–E16 ajoutés et [ancien backlog archivé](archive/Agentic-AIoT_BACKLOG_B3.md). Réf. : commit de réconciliation qui introduit ces deux fichiers.
-- [~] **IOT-151 — Repartir de main.** PR #13 fusionnée sur `6f46362`, main synchronisée en avance rapide et [CI du merge verte](https://github.com/IsmailBHDev/agentic-aiot/actions/runs/45309269913). Créer la branche du ticket suivant depuis main après clôture d’IOT-150.
+- [x] **IOT-150 — Réconcilier le backlog et archiver le plan B3.** État E00–E10 recoupé avec les commits et tests, épics E11–E16 ajoutés et [ancien backlog archivé](archive/Agentic-AIoT_BACKLOG_B3.md). Réf. : PR #14, commit `06cc00e`, fusion `3dadd44`.
+- [x] **IOT-151 — Repartir de main.** PR #13 fusionnée sur `6f46362` avec [CI du merge verte](https://github.com/IsmailBHDev/agentic-aiot/actions/runs/45309269913) ; PR #14 fusionnée sur `3dadd44` ; branche `docs/iot-151-backlog-fixes` créée depuis main. Contrôler la CI du merge `3dadd44` dans l’onglet Actions.
 
 ### E16 — Axe post-quantique
 
@@ -338,6 +338,12 @@ IOT-099 reste facultatif. IOT-131 reste conditionné à la solidité des résult
 | **S6 — Validité scientifique** | Robustesse, répétitions, ablations, incertitudes | IOT-090 à IOT-100 | Résultats multi-graines et limites documentées |
 | **S7 — Écriture** | Revue scientifique, rapport, figure, manuscript éventuel | IOT-110 à IOT-133 | Rapport cohérent, sources vérifiées, résultats traçables |
 | **S8 — Livraison** | CI, reproduction, revue, tag, démonstration | IOT-140 à IOT-148 | Dépôt reproductible, PR validées, présentation prête |
+| **S9 — Reprise (E11)** | Backlog réconcilié, reprise depuis main | IOT-150, IOT-151 | Backlog versionné, branche du ticket suivant créée |
+| **S10 — Axe post-quantique (E16)** | Menaces, signature de la télémétrie, attaque rejouée, coûts | IOT-172 à IOT-179 | Décisions B2 de référence inchangées ; coûts et protection mesurés pour C0 à C3 |
+| **S11 — Mode dégradé (E12)** | Perte du Cloud, coupure Device → Edge, surcharge, benchmark 3 niveaux | IOT-152 à IOT-155 | Aucun incident perdu ; résultats dans des fichiers séparés |
+| **S12 — Ré-entraînement et OTA (E13)** | Contrainte TinyML, ré-entraînement, OTA simulé et signé | IOT-156 à IOT-159 | Modèle versionné, OTA vérifié, test historique non utilisé pour le réglage |
+| **S13 — RAG minimal (E14)** | SLM local, base vectorielle, agent superviseur, évaluation | IOT-160 à IOT-162, IOT-164 | Comparaison chiffrée avec `rule_based_v1`, F1 inchangé |
+| **S14 — Livraison finale (E15)** | Conteneurs, manuel, vidéo, rapport, présentation, tag | IOT-166 à IOT-171 | Chaîne démarrée en une commande ; version finale gelée |
 
 **Travail transversal :** l'état de l'art (E08) et la rédaction du rapport (E09) peuvent commencer dès S0 et progresser en parallèle.
 
@@ -346,6 +352,8 @@ IOT-099 reste facultatif. IOT-131 reste conditionné à la solidité des résult
 `IOT-040 → IOT-041/042 → IOT-043/044 → IOT-047/048 → IOT-050...059 → parité 600/600 → IOT-077...080 → IOT-081...085 → analyses scientifiques → conclusion`.
 
 L'intégration dans le pipeline doit **précéder** les affirmations sur les performances de B3.
+
+**Suite (E11 à E16) :** `IOT-150/151 → IOT-172 → IOT-173 → IOT-174 → IOT-175 et IOT-178 → IOT-179`. `IOT-152...155` peut suivre IOT-174. `IOT-157 → IOT-158 → IOT-176` (l’OTA signé dépend de l’OTA simulé et de la bibliothèque d’IOT-173). `IOT-160 → IOT-161 → IOT-162 → IOT-164`. E15 vient en dernier, après les résultats des axes 1 et 2.
 
 ## 6. Critères d'acceptation globaux (« Definition of Done »)
 
