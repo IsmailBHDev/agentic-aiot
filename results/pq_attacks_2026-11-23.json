@@ -1,0 +1,202 @@
+{
+  "ticket": "IOT-175",
+  "generated_at": "2026-11-24T04:02:59+00:00",
+  "reference": "results/collaborative_b2_predictions.csv",
+  "b2_threshold_celsius": 2.5,
+  "forged_devices": [
+    "node-02",
+    "node-03"
+  ],
+  "forged_shift_celsius": 3.5,
+  "configurations": [
+    "none",
+    "ed25519",
+    "ml-dsa-44"
+  ],
+  "versions": {
+    "python": "3.13.18",
+    "cryptography": "50.0.1",
+    "platform": "Linux-6.18.44-fc-v819-x86_64-with-glibc2.39"
+  },
+  "results": {
+    "baseline": {
+      "none": {
+        "observations": 600,
+        "tp": 39,
+        "fp": 2,
+        "fn": 1,
+        "tn": 558,
+        "no_decision": 0,
+        "f1": 0.963,
+        "contextual_detected": 19,
+        "contextual_total": 20,
+        "messages_received": 600,
+        "messages_auth_rejected": 0,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 0,
+        "batches_completed": 200
+      },
+      "ed25519": {
+        "observations": 600,
+        "tp": 39,
+        "fp": 2,
+        "fn": 1,
+        "tn": 558,
+        "no_decision": 0,
+        "f1": 0.963,
+        "contextual_detected": 19,
+        "contextual_total": 20,
+        "messages_received": 600,
+        "messages_auth_rejected": 0,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 0,
+        "batches_completed": 200
+      },
+      "ml-dsa-44": {
+        "observations": 600,
+        "tp": 39,
+        "fp": 2,
+        "fn": 1,
+        "tn": 558,
+        "no_decision": 0,
+        "f1": 0.963,
+        "contextual_detected": 19,
+        "contextual_total": 20,
+        "messages_received": 600,
+        "messages_auth_rejected": 0,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 0,
+        "batches_completed": 200
+      }
+    },
+    "S1_forged_pair": {
+      "none": {
+        "observations": 600,
+        "tp": 36,
+        "fp": 173,
+        "fn": 4,
+        "tn": 387,
+        "no_decision": 0,
+        "f1": 0.2892,
+        "contextual_detected": 16,
+        "contextual_total": 20,
+        "messages_received": 1000,
+        "messages_auth_rejected": 0,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 400,
+        "batches_completed": 200
+      },
+      "ed25519": {
+        "observations": 600,
+        "tp": 39,
+        "fp": 2,
+        "fn": 1,
+        "tn": 558,
+        "no_decision": 0,
+        "f1": 0.963,
+        "contextual_detected": 19,
+        "contextual_total": 20,
+        "messages_received": 1000,
+        "messages_auth_rejected": 400,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 0,
+        "batches_completed": 200
+      },
+      "ml-dsa-44": {
+        "observations": 600,
+        "tp": 39,
+        "fp": 2,
+        "fn": 1,
+        "tn": 558,
+        "no_decision": 0,
+        "f1": 0.963,
+        "contextual_detected": 19,
+        "contextual_total": 20,
+        "messages_received": 1000,
+        "messages_auth_rejected": 400,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 0,
+        "batches_completed": 200
+      }
+    },
+    "S2_replay": {
+      "none": {
+        "observations": 600,
+        "tp": 2,
+        "fp": 40,
+        "fn": 38,
+        "tn": 520,
+        "no_decision": 0,
+        "f1": 0.0488,
+        "contextual_detected": 0,
+        "contextual_total": 20,
+        "messages_received": 1197,
+        "messages_auth_rejected": 0,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 597,
+        "batches_completed": 200
+      },
+      "ed25519": {
+        "observations": 600,
+        "tp": 39,
+        "fp": 2,
+        "fn": 1,
+        "tn": 558,
+        "no_decision": 0,
+        "f1": 0.963,
+        "contextual_detected": 19,
+        "contextual_total": 20,
+        "messages_received": 1197,
+        "messages_auth_rejected": 597,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 0,
+        "batches_completed": 200
+      },
+      "ml-dsa-44": {
+        "observations": 600,
+        "tp": 39,
+        "fp": 2,
+        "fn": 1,
+        "tn": 558,
+        "no_decision": 0,
+        "f1": 0.963,
+        "contextual_detected": 19,
+        "contextual_total": 20,
+        "messages_received": 1197,
+        "messages_auth_rejected": 597,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 0,
+        "batches_completed": 200
+      }
+    },
+    "S3_fake_alerts": {
+      "none": {
+        "alerts_sent": 200,
+        "incidents_created": 200,
+        "messages_received": 200,
+        "messages_auth_rejected": 0,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 0,
+        "batches_completed": 0
+      },
+      "ed25519": {
+        "alerts_sent": 200,
+        "incidents_created": 0,
+        "messages_received": 200,
+        "messages_auth_rejected": 200,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 0,
+        "batches_completed": 0
+      },
+      "ml-dsa-44": {
+        "alerts_sent": 200,
+        "incidents_created": 0,
+        "messages_received": 200,
+        "messages_auth_rejected": 200,
+        "messages_duplicate": 0,
+        "messages_closed_batch": 0,
+        "batches_completed": 0
+      }
+    }
+  }
+}

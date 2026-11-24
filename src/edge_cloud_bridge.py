@@ -10,6 +10,11 @@ from pathlib import Path
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
+from secure_channel import sealer_from_env
+
+# IOT-177 : incidents signés et chiffrés pour le Cloud (None en C0)
+edge_sealer = sealer_from_env()
+
 DEFAULT_INCIDENTS = (
     Path(__file__).resolve().parents[1]
     / "data"
@@ -24,7 +29,7 @@ async def send_mcp(incident, url):
 
             response = await session.call_tool(
                 "report_incident",
-                {"incident": incident}
+                {"incident": edge_sealer.seal(incident) if edge_sealer else incident}
             )
 
             if response.isError:

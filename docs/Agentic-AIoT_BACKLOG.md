@@ -251,32 +251,32 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
   2. Distinguer attaquant classique et attaquant quantique (« récolter maintenant, déchiffrer plus tard »).
   3. Fixer ce qui est hors périmètre : capteur compromis avec sa clé privée.
   4. Reporter le résultat dans la section 5.6 du rapport.
-- [ ] **IOT-173 — Choisir la bibliothèque**
+- [~] **IOT-173 — Choisir la bibliothèque** Décision : `cryptography` 50.0.2, déjà épinglée, pour Ed25519, ML-DSA-44 (défaut) et ML-KEM-768 ; FN-DSA (C3) reporté et optionnel. Réf. : [`docs/pq_library_choice.md`](pq_library_choice.md), `tests/test_pq_primitives.py` (10 tests réussis sous Linux). Reste : confirmer Windows par la CI de la PR.
   1. Installer liboqs et son interface Python sous Windows et Linux ; noter les versions.
   2. Vérifier ML-DSA, ML-KEM et FN-DSA, plus Ed25519 comme référence classique.
   3. Mettre ces dépendances dans un fichier séparé pour ne pas casser la CI.
-- [ ] **IOT-174 — Signer la télémétrie et la vérifier à l'Edge**
+- [x] **IOT-174 — Signer la télémétrie et la vérifier à l'Edge** Réf. : `src/message_auth.py` (C0 à C2 via `AIOT_AUTH_MODE`, compteur anti-rejeu), vérification dans `src/mqtt_edge_adapter.py` et `src/coap_server.py` (`/telemetry` et `/alert`), signature dans `src/device_simulator.py`, `tests/test_message_auth.py` (29 tests, dont parité 600/600 en Ed25519 et ML-DSA-44).
   1. Générer une paire de clés par capteur simulé ; enregistrer les clés publiques côté Edge.
   2. Signer chaque message avec un compteur ou un horodatage contre le rejeu.
   3. Vérifier avant le regroupement par (session_id, iteration) ; compter les rejets.
   4. Rendre la protection configurable (C0 sans protection, C1 Ed25519, C2 ML-DSA, C3 FN-DSA).
   5. Acceptation : les 600 décisions B2 de référence restent identiques ; un message modifié ou rejoué est rejeté ; tests sur MQTT-SN et CoAP.
-- [ ] **IOT-175 — Rejouer l'attaque des deux capteurs falsifiés**
+- [x] **IOT-175 — Rejouer l'attaque des deux capteurs falsifiés** Réf. : `src/evaluate_pq_attacks.py`, `results/pq_attacks_2026-11-23.json`, `tests/test_pq_attacks.py`. Sur les 600 observations du test historique, S1 fait passer le F1 de 96,30 % à 28,92 % en C0 (173 faux positifs) ; C1 et C2 rejettent les 400 messages falsifiés et retrouvent exactement la référence. S2 (rejeu) et S3 (fausses alertes) sont aussi neutralisés.
   1. Reprendre le scénario E07 « deux capteurs décalés de +3,5 °C » comme injection par un attaquant.
   2. Mesurer les faux positifs et les anomalies manquées de B2 en C0, puis en C2.
   3. Enregistrer dans un nouveau fichier de résultats daté.
-- [ ] **IOT-176 — Signer les modèles OTA (lié à IOT-158)**
+- [x] **IOT-176 — Signer les modèles distribués** Réf. : `src/model_signing.py` (fichier `<modèle>.sig`, vérification avant `joblib.load`, activée par `AIOT_MODEL_SIGNING`), chargement du simulateur via `load_model`, `tests/test_model_signing.py` (10 tests : modèle modifié, remplacé, non signé ou mal algorithmé refusé sans chargement). La distribution OTA elle-même reste à faire dans IOT-158.
   1. Le Cloud signe chaque modèle publié.
   2. Le capteur simulé refuse un modèle non signé ou modifié.
-- [ ] **IOT-177 — Établir le canal Edge–Cloud avec ML-KEM**
+- [x] **IOT-177 — Établir le canal Edge–Cloud avec ML-KEM** Réf. : `src/secure_channel.py` (modes `x25519`, `ml-kem-768` et hybride `x25519+ml-kem-768` via `AIOT_CHANNEL_MODE` ; HKDF-SHA256, AES-256-GCM, incident signé par l'Edge en Ed25519 ou ML-DSA-44, rejeu refusé), scellement dans `src/edge_cloud_bridge.py`, ouverture dans `src/cloud_store.py`, `tests/test_secure_channel.py` (23 tests). Le passage réel par MCP reste à valider avec `AIOT_TEST_NETWORK=1`.
   1. Échanger une clé de session ML-KEM, puis chiffrer les incidents.
   2. Option : version hybride classique + post-quantique.
-- [ ] **IOT-178 — Mesurer le coût**
+- [~] **IOT-178 — Mesurer le coût** Réf. : `src/evaluate_pq_cost.py`, `results/pq_cost_2026-11-23.json`, `tests/test_pq_cost.py`. Mesures hors réseau : primitives sur 1 000 opérations, tailles des messages et incidents scellés, traitement Edge sur 5 × 600 messages. Message de télémétrie : 356 octets en clair, 508 avec Ed25519, 3 650 avec ML-DSA-44 (× 10,25). Calcul ajouté inférieur à 1 ms par message ou incident. Reste : latence du banc B3 en réseau local avec `AIOT_TEST_NETWORK=1`, et mesures dans l'environnement de référence Windows.
   1. Tailles des clés, des signatures et des messages.
   2. Temps de signature et de vérification sur 1 000 opérations.
   3. Latence Edge → décision et octets par incident avec le banc B3 (3 répétitions), pour C0, C1, C2 et C3.
   4. Comparer aux ordres de grandeur publiés (section 2.1 du rapport).
-- [ ] **IOT-179 — Rédiger les résultats : section 6.5, discussion de H4 à H6, menaces à la validité.**
+- [x] **IOT-179 — Rédiger les résultats : section 6.5, discussion de H4 à H6, menaces à la validité.** Réf. : [`docs/pq_results.md`](pq_results.md) (utilisation, reproduction, résultats) ; rapport mis à jour (sections 5.6, 6.5, 7 et 9). H4 soutenue pour le calcul, H5 soutenue en simulation, H6 non testée (FN-DSA reporté).
 
 ### E12 — Résilience et performances
 

@@ -5,7 +5,23 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+import secure_channel
+
 DEFAULT_PATH = Path(__file__).resolve().parents[1] / 'data' / 'cloud_incidents.jsonl'
+
+
+# IOT-177 : ouverture des incidents scellés, une instance par mode et dossier de clés
+_opener_cache = {}
+
+
+def _channel_opener():
+    mode = secure_channel.channel_mode()
+    if mode == secure_channel.NO_CHANNEL:
+        return None
+    key = (mode, str(secure_channel.message_auth.key_dir()))
+    if key not in _opener_cache:
+        _opener_cache[key] = secure_channel.opener_from_env()
+    return _opener_cache[key]
 
 
 def storage_path():
@@ -13,6 +29,11 @@ def storage_path():
 
 
 def report_incident(incident: dict) -> dict:
+    opener = _channel_opener()
+    if opener is not None:
+        incident = opener.open(incident)
+    elif isinstance(incident, dict) and 'sealed' in incident:
+        raise ValueError('sealed incident received while AIOT_CHANNEL_MODE is none')
     if not isinstance(incident, dict):
         raise ValueError('incident must be a JSON object')
     if not isinstance(incident.get('device_id'), str) or not incident['device_id'].strip():

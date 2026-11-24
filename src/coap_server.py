@@ -5,6 +5,7 @@ import time
 from collections import Counter
 
 from aiocoap import resource, Message, Code, Context
+from message_auth import AuthError, verifier_from_env
 from edge_agent import (
     process_message,
     analyze_devices,
@@ -32,10 +33,17 @@ class HealthResource(resource.Resource):
                 "agent": "edge-coordinator"
             }).encode("utf-8")
         )
+_FROM_ENV = object()
+
+
 class TelemetryResource(resource.Resource):
 
-    def __init__(self):
+    def __init__(self, verifier=_FROM_ENV):
         super().__init__()
+        # IOT-174 : None en C0 (sans authentification)
+        self.verifier = (
+            verifier_from_env(EXPECTED_DEVICES) if verifier is _FROM_ENV else verifier
+        )
         self.pending = {}
         self.closed = {}
         self.seen_ids = {}
@@ -90,6 +98,9 @@ class TelemetryResource(resource.Resource):
                 self.collection_metrics["messages_closed_batch"] += 1
                 return Message(code=Code.CHANGED, payload=b"Telemetry already handled")
 
+            if self.verifier is not None:
+                self.verifier.verify(message)
+
             process_message(message)
             self.seen_ids[message_id] = now
             batch[device_id] = message
@@ -106,6 +117,14 @@ class TelemetryResource(resource.Resource):
                 payload=b"Telemetry processed"
             )
 
+        except AuthError as error:
+            self.collection_metrics["messages_auth_rejected"] += 1
+            self.collection_metrics[f"auth_rejected_{error.reason}"] += 1
+            return Message(
+                code=Code.UNAUTHORIZED,
+                payload=b"Unauthenticated telemetry"
+            )
+
         except (ValueError, KeyError, TypeError, OverflowError):
             self.collection_metrics["messages_invalid"] += 1
             return Message(
@@ -113,6 +132,13 @@ class TelemetryResource(resource.Resource):
                 payload=b"Invalid telemetry message"
             )
 class AlertResource(resource.Resource):
+
+    def __init__(self, verifier=_FROM_ENV):
+        super().__init__()
+        # IOT-174 : une alerte locale doit aussi prouver son origine
+        self.verifier = (
+            verifier_from_env(EXPECTED_DEVICES) if verifier is _FROM_ENV else verifier
+        )
 
     async def render_post(self, request):
         try:
@@ -136,6 +162,15 @@ class AlertResource(resource.Resource):
                     code=Code.BAD_REQUEST,
                     payload=b"Invalid device"
                 )
+
+            if self.verifier is not None:
+                try:
+                    self.verifier.verify(message)
+                except AuthError:
+                    return Message(
+                        code=Code.UNAUTHORIZED,
+                        payload=b"Unauthenticated alert"
+                    )
 
             print(
                 f"COAP ALERT : Alerte recue de {device_id}"
