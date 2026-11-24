@@ -261,7 +261,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
   3. Vérifier avant le regroupement par (session_id, iteration) ; compter les rejets.
   4. Rendre la protection configurable (C0 sans protection, C1 Ed25519, C2 ML-DSA, C3 FN-DSA).
   5. Acceptation : les 600 décisions B2 de référence restent identiques ; un message modifié ou rejoué est rejeté ; tests sur MQTT-SN et CoAP.
-- [ ] **IOT-175 — Rejouer l'attaque des deux capteurs falsifiés**
+- [x] **IOT-175 — Rejouer l'attaque des deux capteurs falsifiés** Réf. : `src/evaluate_pq_attacks.py`, `results/pq_attacks_2026-11-23.json`, `tests/test_pq_attacks.py`. Sur les 600 observations du test historique, S1 fait passer le F1 de 96,30 % à 28,92 % en C0 (173 faux positifs) ; C1 et C2 rejettent les 400 messages falsifiés et retrouvent exactement la référence. S2 (rejeu) et S3 (fausses alertes) sont aussi neutralisés.
   1. Reprendre le scénario E07 « deux capteurs décalés de +3,5 °C » comme injection par un attaquant.
   2. Mesurer les faux positifs et les anomalies manquées de B2 en C0, puis en C2.
   3. Enregistrer dans un nouveau fichier de résultats daté.
