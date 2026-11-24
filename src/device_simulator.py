@@ -14,6 +14,7 @@ import joblib
 import pandas as pd
 from aiocoap import Context, Message, POST
 from mqttsn import MqttSnClient
+from message_auth import NO_AUTH, auth_mode, load_signer
 
 
 # ==========================================
@@ -46,6 +47,19 @@ MQTTSN_HOST = "127.0.0.1"
 MQTTSN_PORT = 10000
 
 latencies = []
+
+# IOT-174 : signature des messages selon AIOT_AUTH_MODE (aucune en C0)
+AUTH_MODE = auth_mode()
+signers = (
+    {device: load_signer(device, AUTH_MODE) for device in devices}
+    if AUTH_MODE != NO_AUTH else {}
+)
+
+
+def authenticate(message):
+    """Signe le message du capteur lorsque l'authentification est active."""
+    signer = signers.get(message["src"]["agent"])
+    return signer.sign(message) if signer else message
 
 
 # ==========================================
@@ -255,6 +269,7 @@ async def run_simulation():
                 # Identifier la session et l'itération
                 message["session_id"] = session_id
                 message["iteration"] = i + 1
+                message = authenticate(message)
 
                 # Enregistrer la latence ML
                 latencies.append(

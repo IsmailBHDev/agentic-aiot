@@ -255,7 +255,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
   1. Installer liboqs et son interface Python sous Windows et Linux ; noter les versions.
   2. Vérifier ML-DSA, ML-KEM et FN-DSA, plus Ed25519 comme référence classique.
   3. Mettre ces dépendances dans un fichier séparé pour ne pas casser la CI.
-- [ ] **IOT-174 — Signer la télémétrie et la vérifier à l'Edge**
+- [x] **IOT-174 — Signer la télémétrie et la vérifier à l'Edge** Réf. : `src/message_auth.py` (C0 à C2 via `AIOT_AUTH_MODE`, compteur anti-rejeu), vérification dans `src/mqtt_edge_adapter.py` et `src/coap_server.py` (`/telemetry` et `/alert`), signature dans `src/device_simulator.py`, `tests/test_message_auth.py` (29 tests, dont parité 600/600 en Ed25519 et ML-DSA-44).
   1. Générer une paire de clés par capteur simulé ; enregistrer les clés publiques côté Edge.
   2. Signer chaque message avec un compteur ou un horodatage contre le rejeu.
   3. Vérifier avant le regroupement par (session_id, iteration) ; compter les rejets.
