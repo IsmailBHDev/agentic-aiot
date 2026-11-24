@@ -246,7 +246,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
 
 ### E16 — Axe post-quantique
 
-- [ ] **IOT-172 — Modéliser les menaces**
+- [x] **IOT-172 — Modéliser les menaces** Réf. : [`docs/pq_threat_model.md`](pq_threat_model.md) — 5 actifs, 7 contrôles existants analysés, attaquants A1 à A4, menaces T1 à T8, scénarios S1 à S5 ; section 5.6 du rapport mise à jour.
   1. Lister les attaques : télémétrie falsifiée, rejeu, modèle OTA corrompu, interception Edge–Cloud.
   2. Distinguer attaquant classique et attaquant quantique (« récolter maintenant, déchiffrer plus tard »).
   3. Fixer ce qui est hors périmètre : capteur compromis avec sa clé privée.
