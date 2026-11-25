@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 import time
 from collections import Counter
 import edge_policy
@@ -16,8 +17,9 @@ from telemetry import (
     validate_telemetry,
 )
 
-BROKER_HOST = "127.0.0.1"
-BROKER_PORT = 1883
+# IOT-166 : configurables pour les conteneurs ; valeurs historiques par défaut
+BROKER_HOST = os.environ.get("MQTT_HOST", "127.0.0.1")
+BROKER_PORT = int(os.environ.get("MQTT_PORT", "1883"))
 TOPIC = "aiot/telemetry/+"
 
 # Date de reception du premier message de chaque groupe

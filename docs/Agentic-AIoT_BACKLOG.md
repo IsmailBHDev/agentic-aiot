@@ -319,7 +319,7 @@ Le périmètre E14 reste à confirmer avec le professeur.
 
 ### E15 — Démonstration et livraison finale
 
-- [ ] **IOT-166 — Conteneuriser l'Edge et le Cloud : une seule commande démarre toute la chaîne.**
+- [x] **IOT-166 — Conteneuriser l'Edge et le Cloud : une seule commande démarre toute la chaîne.** Réf. : `docker/app.Dockerfile` (image unique, Python 3.14.6), `docker-compose.yml` (broker, 4 services Edge, 3 services Cloud, simulateur en profil `demo`, volumes `edge-data` et `cloud-data`), section Docker du `README.md`. Hôtes et ports rendus configurables par variables d'environnement, valeurs historiques par défaut. Vérifié sous Windows (Docker 29.8.1) le 25 novembre 2026 : `docker compose up -d --build` démarre les 8 services ; une session du simulateur produit 3 incidents Edge, 3 incidents Cloud et 3 décisions A2A ; pont arrêté pendant une seconde session puis relancé : 6/6 incidents transmis, sans doublon. Suite complète avec les tests réseau : 210 réussis.
 - [ ] **IOT-167 — Manuel d'installation et d'utilisation (Windows et Linux).**
 - [ ] **IOT-168 — Vidéo de démonstration : incident capté, traité à l'Edge, analysé au Cloud, message signé.**
 - [ ] **IOT-169 — Rapport final : axes 1 et 2 ; alignement sur le canevas du professeur (IOT-129, fichier Word attendu).**

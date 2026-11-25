@@ -1,0 +1,14 @@
+.git
+.github
+.venv
+venv
+artifacts
+legacy
+results
+docs
+tests
+data
+**/__pycache__
+*.log
+.env
+.env.*

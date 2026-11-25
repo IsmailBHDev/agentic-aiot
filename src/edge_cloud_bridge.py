@@ -157,7 +157,7 @@ def main():
 
     parser.add_argument(
         "--mcp-url",
-        default="http://127.0.0.1:8000/mcp"
+        default=os.environ.get("AIOT_MCP_URL", "http://127.0.0.1:8000/mcp")
     )
 
     parser.add_argument(
