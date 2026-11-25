@@ -56,3 +56,29 @@ Moyennes sur 3 graines. Le rappel est calculé sur les 40 anomalies du test hist
 - Piste d'amélioration, non implémentée : décider à deux capteurs quand le troisième manque (écart entre deux mesures), au prix d'une référence moins robuste.
 
 **Tests :** `tests/test_device_loss.py` (6 tests) — parité complète sans perte, retransmissions ignorées, aucune décision double ou fausse sous pertes, chaque alerte B1 reçue journalisée, coupure franche expirant exactement les itérations coupées, état de l'Edge restauré après l'évaluation.
+
+## IOT-154 — Surcharge de l'Edge
+
+**Résultat :** sans authentification, le calcul de l'Edge suit le débit jusqu'à environ 48 000 messages par seconde, la plus haute valeur testée. Avec la vérification ML-DSA-44, il tient 5 000 messages par seconde et sature vers 6 000. Au-delà, aucun message n'est perdu dans les 2 s de mesure, mais l'attente s'accumule, jusqu'à 4 s au 95ᵉ centile.
+
+**Défaut trouvé et corrigé :** la protection anti-rejeu d'IOT-174 parcourait, à chaque message, tous les compteurs mémorisés pour oublier les plus anciens. Sous charge, le traitement passait de 0,35 ms à 3,9 ms par message et le débit tombait à environ 260 messages par seconde. Les compteurs sont maintenant gardés dans une file ordonnée et oubliés en temps constant (`src/message_auth.py`) ; un test de régression le vérifie.
+
+**Protocole (`src/evaluate_edge_load.py`) :** le vrai chemin Edge MQTT (`on_message`) reçoit des messages à débit imposé, en temps réel, sur une seule boucle asyncio, pendant 2 s par débit (30 000 messages au plus). Les messages reprennent le test historique avec une nouvelle session à chaque passage. Le séjour mesure l'attente plus le traitement. Le broker, le réseau et l'affichage console ne sont pas inclus. Mesures réalisées dans l'environnement de vérification Linux (Python 3.13.18) ; résultats : `results/resilience_edge_load_2026-11-25.json`.
+
+| Débit offert (msg/s) | C0 — atteint | C0 — séjour p50 / p95 | C2 ML-DSA-44 — atteint | C2 — séjour p50 / p95 |
+|---:|---:|---:|---:|---:|
+| 1 000 | 1 000 | 0,64 / 1,17 ms | 1 000 | 0,82 / 1,42 ms |
+| 2 000 | 2 000 | 0,65 / 1,22 ms | 2 000 | 0,83 / 1,45 ms |
+| 5 000 | 4 997 | 0,65 / 1,23 ms | 4 999 | 0,94 / 12,56 ms |
+| 10 000 | 9 998 | 0,65 / 1,22 ms | 5 404 | 955 / 1 609 ms |
+| 20 000 | 20 000 | 0,67 / 1,24 ms | 5 992 | 1 698 / 3 299 ms |
+| 50 000 | 48 364 | 0,86 / 21,38 ms | 6 048 | 2 206 / 4 160 ms |
+
+Débit tenu (au moins 95 % du débit offert et p95 ≤ 100 ms) : 50 000 msg/s en C0 dans la plage testée, 5 000 msg/s en C2. Le traitement moyen d'un message vaut environ 0,02 à 0,10 ms en C0 et 0,17 à 0,36 ms en C2.
+
+**Lecture :**
+- Le banc du projet n'envoie que trois messages par itération et par seconde : la marge est de plusieurs ordres de grandeur, même avec ML-DSA-44.
+- Au-delà de la saturation, l'attente croît sans perte immédiate ; si le retard dépassait 5 s, des lots commenceraient à expirer.
+- Ces chiffres décrivent le calcul de l'Edge sur un PC ; le broker MQTT, le réseau et un matériel Edge contraint réduiraient ces débits.
+
+**Tests :** `tests/test_edge_load.py` (2 tests) — structure de la mesure et restauration de l'état, régression de l'anti-rejeu.
