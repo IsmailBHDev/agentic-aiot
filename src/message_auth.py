@@ -19,6 +19,7 @@ import base64
 import json
 import os
 import time
+from collections import deque
 from pathlib import Path
 
 from cryptography.exceptions import InvalidSignature
@@ -134,6 +135,9 @@ class EdgeVerifier:
         self.public_keys = dict(public_keys)
         self.clock = clock
         self._seen = {}  # (device_id, ctr) -> date de réception
+        # File dans l'ordre de réception : l'oubli des compteurs anciens coûte
+        # O(1) amorti par message au lieu de parcourir tous les compteurs (IOT-154).
+        self._order = deque()
 
     def verify(self, message):
         """Renvoie le capteur authentifié ou lève ``AuthError``."""
@@ -163,11 +167,13 @@ class EdgeVerifier:
         if (device_id, counter) in self._seen:
             raise AuthError("replay")
         self._seen[device_id, counter] = now
+        self._order.append((now, (device_id, counter)))
         return device_id
 
     def _forget_old(self, now):
-        for entry, received in list(self._seen.items()):
-            if now - received >= REPLAY_RETENTION_SECONDS:
+        while self._order and now - self._order[0][0] >= REPLAY_RETENTION_SECONDS:
+            received, entry = self._order.popleft()
+            if self._seen.get(entry) == received:
                 del self._seen[entry]
 
 

@@ -1,0 +1,106 @@
+{
+  "ticket": "IOT-155",
+  "generated_at": "2026-11-25T21:48:31+00:00",
+  "scope": "Calcul par niveau, hors réseau ; latences réseau reprises du banc B3.",
+  "operations": 1000,
+  "versions": {
+    "python": "3.14.6",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "scikit_learn": "1.9.1",
+    "cryptography": "50.0.2"
+  },
+  "results": {
+    "device": {
+      "model_bytes": 1801,
+      "model_load_ms": 901.817,
+      "inference_with_dataframe": {
+        "n": 1000,
+        "mean_ms": 0.336,
+        "median_ms": 0.317,
+        "p95_ms": 0.4131
+      },
+      "message_signing": {
+        "ed25519": {
+          "n": 1000,
+          "mean_ms": 0.029,
+          "median_ms": 0.0281,
+          "p95_ms": 0.0328
+        },
+        "ml-dsa-44": {
+          "n": 1000,
+          "mean_ms": 0.3448,
+          "median_ms": 0.2639,
+          "p95_ms": 0.8022
+        }
+      }
+    },
+    "edge": {
+      "on_message": {
+        "none": {
+          "n": 1800,
+          "mean_ms": 0.0388,
+          "median_ms": 0.0109,
+          "p95_ms": 0.3027
+        },
+        "ml-dsa-44": {
+          "n": 1800,
+          "mean_ms": 0.1266,
+          "median_ms": 0.0949,
+          "p95_ms": 0.3698
+        }
+      },
+      "b2_batch_calculation": {
+        "n": 200,
+        "mean_ms": 0.0031,
+        "median_ms": 0.0029,
+        "p95_ms": 0.0039
+      }
+    },
+    "cloud": {
+      "store_incident": {
+        "n": 1000,
+        "mean_ms": 0.3023,
+        "median_ms": 0.283,
+        "p95_ms": 0.4253
+      },
+      "open_sealed_incident_ml_kem_768": {
+        "n": 1000,
+        "mean_ms": 0.1473,
+        "median_ms": 0.1387,
+        "p95_ms": 0.1635
+      },
+      "a2a_rule_analysis": {
+        "n": 1000,
+        "mean_ms": 0.0005,
+        "median_ms": 0.0005,
+        "p95_ms": 0.0005
+      },
+      "rag_supervisor": null
+    },
+    "network_reference": {
+      "source": "results/pq_b3_network_2026-11-25.json",
+      "median_ms": {
+        "none|none": {
+          "edge_to_cloud": 653.22,
+          "cloud_to_decision": 67.52,
+          "edge_to_decision": 719.69
+        },
+        "ed25519|x25519": {
+          "edge_to_cloud": 594.6,
+          "cloud_to_decision": 80.43,
+          "edge_to_decision": 677.55
+        },
+        "ml-dsa-44|ml-kem-768": {
+          "edge_to_cloud": 1045.16,
+          "cloud_to_decision": 82.04,
+          "edge_to_decision": 1120.84
+        },
+        "ml-dsa-44|x25519+ml-kem-768": {
+          "edge_to_cloud": 1154.51,
+          "cloud_to_decision": 78.4,
+          "edge_to_decision": 1228.0
+        }
+      }
+    }
+  }
+}

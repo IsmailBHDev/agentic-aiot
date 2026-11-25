@@ -1,0 +1,205 @@
+{
+  "ticket": "IOT-156",
+  "generated_at": "2026-11-25T21:46:17+00:00",
+  "scope": "Simulation sur PC : tailles et accords exacts ; temps Python, non représentatifs d'un microcontrôleur.",
+  "versions": {
+    "python": "3.13.18",
+    "platform": "Linux-6.18.44-fc-v880-x86_64-with-glibc2.39",
+    "scikit_learn": "1.9.1"
+  },
+  "results": {
+    "reference_check": {
+      "retrained_matches_reference_predictions": true,
+      "test_size": 600
+    },
+    "variants": {
+      "sklearn_joblib": {
+        "nodes": 15,
+        "bytes": 2793,
+        "agreement_test": 600,
+        "agreement_train": 2400,
+        "f1_test": 0.8493
+      },
+      "pruned_float64": {
+        "nodes": 11,
+        "bytes": 72,
+        "agreement_test": 600,
+        "agreement_train": 2400,
+        "f1_test": 0.8493
+      },
+      "pruned_int32_milli": {
+        "description": "millièmes, int32",
+        "nodes": 11,
+        "bytes": 52,
+        "agreement_test": 600,
+        "agreement_train": 2400,
+        "f1_test": 0.8493
+      },
+      "pruned_int16_centi": {
+        "description": "centièmes, int16",
+        "nodes": 11,
+        "bytes": 42,
+        "agreement_test": 600,
+        "agreement_train": 2400,
+        "f1_test": 0.8493
+      }
+    },
+    "inference_single_sample": {
+      "sklearn_dataframe": {
+        "n": 600,
+        "mean_ms": 0.37143,
+        "median_ms": 0.36381,
+        "p95_ms": 0.44202
+      },
+      "sklearn_numpy": {
+        "n": 600,
+        "mean_ms": 0.07749,
+        "median_ms": 0.07286,
+        "p95_ms": 0.10112
+      },
+      "python_table_float": {
+        "n": 600,
+        "mean_ms": 0.00031,
+        "median_ms": 0.00029,
+        "p95_ms": 0.00039
+      },
+      "python_table_int32_milli": {
+        "n": 600,
+        "mean_ms": 0.0005,
+        "median_ms": 0.00048,
+        "p95_ms": 0.0006
+      }
+    },
+    "rules": {
+      "pruned_float64": [
+        {
+          "leaf": false,
+          "feature": 0,
+          "threshold": 29.22949981689453,
+          "left": 1,
+          "right": 6
+        },
+        {
+          "leaf": false,
+          "feature": 0,
+          "threshold": 28.4375,
+          "left": 2,
+          "right": 3
+        },
+        {
+          "leaf": true,
+          "cls": 0
+        },
+        {
+          "leaf": false,
+          "feature": 1,
+          "threshold": 0.3439999967813492,
+          "left": 4,
+          "right": 5
+        },
+        {
+          "leaf": true,
+          "cls": 0
+        },
+        {
+          "leaf": true,
+          "cls": 1
+        },
+        {
+          "leaf": false,
+          "feature": 0,
+          "threshold": 29.505000114440918,
+          "left": 7,
+          "right": 10
+        },
+        {
+          "leaf": false,
+          "feature": 1,
+          "threshold": 0.2770000100135803,
+          "left": 8,
+          "right": 9
+        },
+        {
+          "leaf": true,
+          "cls": 0
+        },
+        {
+          "leaf": true,
+          "cls": 1
+        },
+        {
+          "leaf": true,
+          "cls": 1
+        }
+      ],
+      "pruned_int32_milli": [
+        {
+          "leaf": false,
+          "feature": 0,
+          "threshold": 29229,
+          "left": 1,
+          "right": 6
+        },
+        {
+          "leaf": false,
+          "feature": 0,
+          "threshold": 28437,
+          "left": 2,
+          "right": 3
+        },
+        {
+          "leaf": true,
+          "cls": 0
+        },
+        {
+          "leaf": false,
+          "feature": 1,
+          "threshold": 343,
+          "left": 4,
+          "right": 5
+        },
+        {
+          "leaf": true,
+          "cls": 0
+        },
+        {
+          "leaf": true,
+          "cls": 1
+        },
+        {
+          "leaf": false,
+          "feature": 0,
+          "threshold": 29505,
+          "left": 7,
+          "right": 10
+        },
+        {
+          "leaf": false,
+          "feature": 1,
+          "threshold": 277,
+          "left": 8,
+          "right": 9
+        },
+        {
+          "leaf": true,
+          "cls": 0
+        },
+        {
+          "leaf": true,
+          "cls": 1
+        },
+        {
+          "leaf": true,
+          "cls": 1
+        }
+      ]
+    },
+    "deployed_simulator_model": {
+      "file": "models/device_model.joblib",
+      "nodes": 3,
+      "file_bytes": 1801,
+      "agreement_with_reference_b1_test": 587,
+      "f1_test": 0.6667
+    }
+  }
+}

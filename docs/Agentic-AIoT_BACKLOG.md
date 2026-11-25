@@ -280,15 +280,16 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
 
 ### E12 — Résilience et performances
 
-- [ ] **IOT-152 — Perte du Cloud**
+- [x] **IOT-152 — Perte du Cloud** Réf. : [`docs/resilience.md`](resilience.md), `tests/test_cloud_outage.py` (6 tests). L'Edge continue B1, B2 et la journalisation pendant la panne (600 décisions identiques) ; le pont transmet ensuite tous les incidents en attente, une fois chacun et dans l'ordre. Pont corrigé : position avancée par incident, fichier d'état optionnel pour la reprise, attente bornée, compteurs.
   1. Arrêter MCP et A2A pendant un rejeu.
   2. Vérifier que l'Edge continue B1, B2 et la journalisation.
   3. Relancer le Cloud et vérifier que le pont transmet les incidents en attente.
   4. Acceptation : aucun incident perdu ; décisions B2 identiques avec ou sans Cloud.
-- [ ] **IOT-153 — Coupure Device → Edge : pertes, lots incomplets, B1 traité immédiatement, aucune double décision.**
-- [ ] **IOT-154 — Surcharge : débit croissant ; mesure de la latence, des pertes et du point de saturation de l'Edge.**
-- [ ] **IOT-155 — Benchmark des trois niveaux : inférence Device, orchestration Edge, réponse Cloud (et RAG après E14), dans un fichier séparé.**
-- [ ] **IOT-156 — Simuler la contrainte TinyML : taille du modèle, temps d'inférence ; version compressée évaluée à part.**
+- [x] **IOT-153 — Coupure Device → Edge** Réf. : `src/evaluate_device_loss.py`, `results/resilience_device_loss_2026-11-25.json`, `tests/test_device_loss.py` (6 tests), [`docs/resilience.md`](resilience.md). De 0 à 30 % de pertes, avec doublons et désordre : aucune double décision, aucune décision B2 fausse, chaque alerte B1 reçue journalisée immédiatement. Le rappel B2 tombe de 97,5 % à 74,2 % à 10 % de pertes (87,5 % avec les alertes B1), car un lot exige les trois capteurs.
+- [x] **IOT-154 — Surcharge** Réf. : `src/evaluate_edge_load.py`, `results/resilience_edge_load_2026-11-25.json`, `tests/test_edge_load.py` (2 tests), [`docs/resilience.md`](resilience.md). Calcul de l'Edge seul (sans broker ni réseau) : C0 suit jusqu'à environ 48 000 msg/s (plus haut débit testé) ; avec ML-DSA-44, 5 000 msg/s tenus et saturation vers 6 000, sans perte mais avec attente croissante. Défaut corrigé : l'anti-rejeu d'IOT-174 devenait coûteux sous charge (débit tombé à ~260 msg/s).
+- [x] **IOT-155 — Benchmark des trois niveaux** Réf. : `src/evaluate_tiers.py`, `tests/test_tiers.py`. Mesure par niveau : inférence et signature au Device, traitement d'un message et calcul B2 à l'Edge, enregistrement, ouverture d'un incident scellé et analyse A2A au Cloud ; latences réseau reprises du banc B3 ; colonne RAG réservée à E14. Mesuré sous Windows le 25 novembre 2026 (`results/tiers_benchmark_2026-11-25.json`) : moins de 0,5 ms de calcul par opération et par niveau ; la latence de bout en bout vient du trajet Edge → Cloud.
+- [x] **IOT-156 — Simuler la contrainte TinyML** Réf. : `src/evaluate_tinyml.py`, `results/tinyml_b1_2026-11-25.json`, `tests/test_tinyml.py` (7 tests), [`docs/resilience.md`](resilience.md). B1 élagué (15 → 11 nœuds) et quantifié en int16 : 42 octets au lieu de 2 793, prédictions identiques sur 3 000 observations, F1 inchangé (84,93 %). L'inférence via DataFrame et scikit-learn coûte 0,37 ms contre 0,0005 ms pour la table.
+- [ ] **IOT-180 — Aligner le modèle du simulateur sur le B1 évalué.** `models/device_model.joblib` (une seule comparaison, F1 de 66,67 % sur le test, 13 écarts sur 600 avec le B1 de référence) diffère du B1 des résultats. Décider s'il faut le remplacer (fichier du manifeste : nouvelle version du manifeste requise) ou documenter l'écart.
 
 ### E13 — Réentraînement et OTA simulé
 
