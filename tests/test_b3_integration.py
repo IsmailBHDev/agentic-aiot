@@ -46,6 +46,26 @@ def telemetry(session, index):
 
 @pytest.mark.parametrize("run_number", [1, 2, 3])
 def test_b3_replay_mqttsn_and_coap(tmp_path, monkeypatch, run_number):
+    # IOT-178 : configurations C0 à C2 choisies par AIOT_AUTH_MODE et AIOT_CHANNEL_MODE.
+    # Sans ces variables, le banc reste en C0, comme avant. Les clés de chaque
+    # répétition sont créées AVANT d'importer l'Edge et le pont, qui les chargent
+    # dès leur import.
+    import message_auth
+    import secure_channel
+
+    devices = ("node-01", "node-02", "node-03")
+    auth_mode = message_auth.auth_mode()
+    channel_mode = secure_channel.channel_mode()
+    monkeypatch.setenv(message_auth.KEY_DIR_ENV, str(tmp_path / "keys"))
+    if auth_mode != message_auth.NO_AUTH:
+        message_auth.create_keyring(auth_mode, devices)
+    if channel_mode != secure_channel.NO_CHANNEL:
+        secure_channel.create_channel_keys(channel_mode)
+    signers = (
+        {device: message_auth.load_signer(device, auth_mode) for device in devices}
+        if auth_mode != message_auth.NO_AUTH else {}
+    )
+
     import uvicorn
     from aiocoap import Code, Context, Message, resource
 
@@ -78,6 +98,18 @@ def test_b3_replay_mqttsn_and_coap(tmp_path, monkeypatch, run_number):
         monkeypatch.setattr(mqtt_edge, name, {})
     monkeypatch.setattr(orchestrator, "INCIDENTS_FILE", cloud_file)
     monkeypatch.setattr(orchestrator, "DECISIONS_FILE", decision_file)
+
+    # IOT-178 : vérificateur, scellement et ouverture liés aux clés de cette répétition
+    import cloud_store
+    import edge_cloud_bridge
+
+    monkeypatch.setattr(mqtt_edge, "message_verifier", message_auth.verifier_from_env(devices))
+    monkeypatch.setattr(edge_cloud_bridge, "edge_sealer", secure_channel.sealer_from_env())
+    monkeypatch.setattr(cloud_store, "_opener_cache", {})
+
+    def sign(message):
+        signer = signers.get(message["src"]["agent"])
+        return signer.sign(message) if signer else message
 
     async def run():
         test_id = uuid4().hex[:12]
@@ -135,12 +167,21 @@ def test_b3_replay_mqttsn_and_coap(tmp_path, monkeypatch, run_number):
             collector = TelemetryResource()
             site.add_resource(["telemetry"], collector)
             site.add_resource(["alert"], AlertResource())
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as reservation:
-                reservation.bind(("127.0.0.1", 0))
-                coap_port = reservation.getsockname()[1]
-            coap_server = await Context.create_server_context(
-                site, bind=("127.0.0.1", coap_port)
-            )
+            # Sous Windows, un port libéré peut être refusé à la réouverture
+            # (WinError 10013, plages réservées par Hyper-V ou Docker) : on réessaie.
+            for attempt in range(20):
+                with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as reservation:
+                    reservation.bind(("127.0.0.1", 0))
+                    coap_port = reservation.getsockname()[1]
+                try:
+                    coap_server = await Context.create_server_context(
+                        site, bind=("127.0.0.1", coap_port)
+                    )
+                    break
+                except OSError:
+                    if attempt == 19:
+                        raise
+                    transport_counts["coap_bind_retries"] += 1
             coap_client = await Context.create_client_context()
             bridge = asyncio.create_task(watch_incidents(edge_file, mcp_url, interval=0.02))
             await asyncio.sleep(0)
@@ -162,23 +203,23 @@ def test_b3_replay_mqttsn_and_coap(tmp_path, monkeypatch, run_number):
                     try:
                         await node.connect("127.0.0.1", gateway_port)
                         for group in range(repetitions):
-                            payload = json.dumps(telemetry(f"mqtt-sn-session-{group}", index)).encode()
+                            payload = json.dumps(sign(telemetry(f"mqtt-sn-session-{group}", index))).encode()
                             transport_counts["mqttsn_publishes"] += 1
                             transport_counts["mqttsn_payload_bytes"] += len(payload)
                             await node.publish(f"{topic_prefix}/node-0{index}", payload, qos=1)
-                            await post_coap("telemetry", telemetry(f"coap-session-{group}", index))
+                            await post_coap("telemetry", sign(telemetry(f"coap-session-{group}", index)))
                     finally:
                         await node.close()
 
                 local = telemetry("coap-local-session", 1)
                 local["type"] = "anomaly_alert"
                 local["payload"]["prediction"] = 1
-                await post_coap("telemetry", local)
-                await post_coap("alert", {
+                await post_coap("telemetry", sign(local))
+                await post_coap("alert", sign({
                     "type": "anomaly_alert", "src": {"agent": "node-02"},
                     "session_id": "coap-unknown-session",
                     "payload": {"temperature": 28.0},
-                })
+                }))
 
                 while len(read_records(decision_file)) < 2 * repetitions + 2:
                     processed = await asyncio.to_thread(orchestrator.process_pending_incidents)
@@ -269,8 +310,10 @@ def test_b3_replay_mqttsn_and_coap(tmp_path, monkeypatch, run_number):
             (decision_at - edge_at).total_seconds() * 1000,
         ))
 
-    print("B3_METRICS " + json.dumps({
+    metrics = {
         "run": run_number,
+        "auth_mode": auth_mode,
+        "channel_mode": channel_mode,
         "incidents": len(edge),
         "cloud_copies": len(cloud),
         "decisions": len(decisions),
@@ -281,4 +324,9 @@ def test_b3_replay_mqttsn_and_coap(tmp_path, monkeypatch, run_number):
         "messages": dict(transport_counts | poll_counts),
         "mqtt_collection": transport_metrics[0],
         "coap_collection": transport_metrics[1],
-    }))
+    }
+    print("B3_METRICS " + json.dumps(metrics))
+    metrics_file = os.getenv("AIOT_B3_METRICS_FILE")
+    if metrics_file:
+        with open(metrics_file, "a", encoding="utf-8") as stream:
+            stream.write(json.dumps(metrics) + "\n")

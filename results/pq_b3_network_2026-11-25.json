@@ -1,0 +1,1016 @@
+{
+  "ticket": "IOT-178",
+  "generated_at": "2026-11-25T13:45:40+00:00",
+  "scope": "Banc B3 en boucle locale (Mosquitto, MQTT-SN, CoAP, MCP, A2A), scrutation de 20 ms.",
+  "platform": {
+    "bench": {
+      "system": "Windows",
+      "python": "3.14.6",
+      "platform": "Windows-11-10.0.26300-SP0"
+    },
+    "mosquitto": "eclipse-mosquitto:2 (Docker)",
+    "summary_regenerated_with": {
+      "python": "3.10.12",
+      "platform": "Linux-6.8.0-149-generic-x86_64-with-glibc2.35"
+    }
+  },
+  "summary": {
+    "none|none": {
+      "label": "C0 — sans protection",
+      "auth_mode": "none",
+      "channel_mode": "none",
+      "runs": 6,
+      "incidents": 108,
+      "decisions": 108,
+      "auth_rejected": 0,
+      "latency_mean_ms": {
+        "edge_to_cloud": 772.62,
+        "cloud_to_decision": 67.52,
+        "edge_to_decision": 840.14
+      },
+      "edge_to_decision_median_ms": 719.69,
+      "edge_to_decision_range_ms": [
+        502.43,
+        1260.74
+      ],
+      "per_run_mean": {
+        "mqttsn_payload_bytes": 6696.0,
+        "coap_payload_bytes": 7034.0,
+        "mcp_request_body_bytes": 10920.0,
+        "a2a_request_body_bytes": 10394.0,
+        "mcp_http_requests": 108.0,
+        "a2a_http_requests": 18.0
+      },
+      "edge_to_decision_median_vs_c0_ms": 0.0
+    },
+    "ed25519|x25519": {
+      "label": "C1 — Ed25519 + X25519",
+      "auth_mode": "ed25519",
+      "channel_mode": "x25519",
+      "runs": 6,
+      "incidents": 108,
+      "decisions": 108,
+      "auth_rejected": 0,
+      "latency_mean_ms": {
+        "edge_to_cloud": 713.01,
+        "cloud_to_decision": 80.94,
+        "edge_to_decision": 793.96
+      },
+      "edge_to_decision_median_ms": 677.55,
+      "edge_to_decision_range_ms": [
+        574.16,
+        1147.68
+      ],
+      "per_run_mean": {
+        "mqttsn_payload_bytes": 10344.0,
+        "coap_payload_bytes": 10986.0,
+        "mcp_request_body_bytes": 18094.0,
+        "a2a_request_body_bytes": 10394.0,
+        "mcp_http_requests": 108.0,
+        "a2a_http_requests": 18.0
+      },
+      "edge_to_decision_median_vs_c0_ms": -42.14
+    },
+    "ml-dsa-44|ml-kem-768": {
+      "label": "C2 — ML-DSA-44 + ML-KEM-768",
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "ml-kem-768",
+      "runs": 6,
+      "incidents": 108,
+      "decisions": 108,
+      "auth_rejected": 0,
+      "latency_mean_ms": {
+        "edge_to_cloud": 958.93,
+        "cloud_to_decision": 86.28,
+        "edge_to_decision": 1045.21
+      },
+      "edge_to_decision_median_ms": 1120.84,
+      "edge_to_decision_range_ms": [
+        595.84,
+        1605.59
+      ],
+      "per_run_mean": {
+        "mqttsn_payload_bytes": 85752.0,
+        "coap_payload_bytes": 92678.0,
+        "mcp_request_body_bytes": 118980.0,
+        "a2a_request_body_bytes": 10394.0,
+        "mcp_http_requests": 108.0,
+        "a2a_http_requests": 18.0
+      },
+      "edge_to_decision_median_vs_c0_ms": 401.15
+    },
+    "ml-dsa-44|x25519+ml-kem-768": {
+      "label": "C2 hybride — ML-DSA-44 + X25519/ML-KEM-768",
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "x25519+ml-kem-768",
+      "runs": 6,
+      "incidents": 108,
+      "decisions": 108,
+      "auth_rejected": 0,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1047.66,
+        "cloud_to_decision": 79.43,
+        "edge_to_decision": 1127.09
+      },
+      "edge_to_decision_median_ms": 1228.0,
+      "edge_to_decision_range_ms": [
+        622.35,
+        1470.9
+      ],
+      "per_run_mean": {
+        "mqttsn_payload_bytes": 85752.0,
+        "coap_payload_bytes": 92678.0,
+        "mcp_request_body_bytes": 120060.0,
+        "a2a_request_body_bytes": 10394.0,
+        "mcp_http_requests": 108.0,
+        "a2a_http_requests": 18.0
+      },
+      "edge_to_decision_median_vs_c0_ms": 508.31
+    }
+  },
+  "runs": [
+    {
+      "run": 1,
+      "auth_mode": "none",
+      "channel_mode": "none",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 570.1908888888889,
+        "cloud_to_decision": 64.4815,
+        "edge_to_decision": 634.6723888888889
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 6696,
+        "coap_posts": 26,
+        "coap_payload_bytes": 7034,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 10920,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 15,
+        "orchestrator_empty_polls": 1
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.5374015999841504
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.5449856999912299
+      }
+    },
+    {
+      "run": 2,
+      "auth_mode": "none",
+      "channel_mode": "none",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 533.7970555555555,
+        "cloud_to_decision": 72.66144444444444,
+        "edge_to_decision": 606.4585
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 6696,
+        "coap_posts": 26,
+        "coap_payload_bytes": 7034,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 10920,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 14
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.583668100007344
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.5945076999487355
+      }
+    },
+    {
+      "run": 3,
+      "auth_mode": "none",
+      "channel_mode": "none",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 432.8897777777778,
+        "cloud_to_decision": 69.54038888888888,
+        "edge_to_decision": 502.43016666666665
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 6696,
+        "coap_posts": 26,
+        "coap_payload_bytes": 7034,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 10920,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 12,
+        "orchestrator_empty_polls": 2
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.2988809999660589
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.2981464998447336
+      }
+    },
+    {
+      "run": 1,
+      "auth_mode": "ed25519",
+      "channel_mode": "x25519",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 629.5512222222222,
+        "cloud_to_decision": 91.6525,
+        "edge_to_decision": 721.2037222222223
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 10344,
+        "coap_posts": 26,
+        "coap_payload_bytes": 10986,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 18094,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 11,
+        "orchestrator_empty_polls": 1
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.6651088000508025
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.6555581000866368
+      }
+    },
+    {
+      "run": 2,
+      "auth_mode": "ed25519",
+      "channel_mode": "x25519",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 497.79766666666666,
+        "cloud_to_decision": 102.22077777777778,
+        "edge_to_decision": 600.0184444444444
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 10344,
+        "coap_posts": 26,
+        "coap_payload_bytes": 10986,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 18094,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 10
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.6313685000059195
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.6355122999520972
+      }
+    },
+    {
+      "run": 3,
+      "auth_mode": "ed25519",
+      "channel_mode": "x25519",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 487.5468888888889,
+        "cloud_to_decision": 86.6165,
+        "edge_to_decision": 574.1633888888889
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 10344,
+        "coap_posts": 26,
+        "coap_payload_bytes": 10986,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 18094,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 10
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.467651600134559
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.47442879993468523
+      }
+    },
+    {
+      "run": 1,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 514.4093888888889,
+        "cloud_to_decision": 81.43161111111111,
+        "edge_to_decision": 595.841
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 118980,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 12
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.7816229000454769
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.8701415000250563
+      }
+    },
+    {
+      "run": 2,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1122.0031111111111,
+        "cloud_to_decision": 87.15688888888889,
+        "edge_to_decision": 1209.1599999999999
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 118980,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 30,
+        "orchestrator_empty_polls": 13
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.7261063000187278
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.856160799972713
+      }
+    },
+    {
+      "run": 3,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1056.699111111111,
+        "cloud_to_decision": 79.61766666666666,
+        "edge_to_decision": 1136.3167777777778
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 118980,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 33,
+        "orchestrator_empty_polls": 16
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.5675203999271616
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.709871900093276
+      }
+    },
+    {
+      "run": 1,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "x25519+ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 728.1633888888889,
+        "cloud_to_decision": 70.73655555555555,
+        "edge_to_decision": 798.8999444444444
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 120060,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 27,
+        "orchestrator_empty_polls": 10
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.7333612000802532
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.8389902000199072
+      }
+    },
+    {
+      "run": 2,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "x25519+ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1163.1071111111112,
+        "cloud_to_decision": 69.79122222222222,
+        "edge_to_decision": 1232.8983333333333
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 120060,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 38,
+        "orchestrator_empty_polls": 21
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 2.0625762000563554
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 2.2264320999966003
+      }
+    },
+    {
+      "run": 3,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "x25519+ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1145.9192222222223,
+        "cloud_to_decision": 77.17311111111111,
+        "edge_to_decision": 1223.0923333333333
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 120060,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 36,
+        "orchestrator_empty_polls": 19
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 2.135740300058387
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 2.284497400163673
+      }
+    },
+    {
+      "run": 1,
+      "auth_mode": "none",
+      "channel_mode": "none",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 736.2411111111111,
+        "cloud_to_decision": 68.46544444444444,
+        "edge_to_decision": 804.7065555555555
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 6696,
+        "coap_posts": 26,
+        "coap_payload_bytes": 7034,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 10920,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 25,
+        "orchestrator_empty_polls": 7
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.9019878999679349
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.9149318999261595
+      }
+    },
+    {
+      "run": 2,
+      "auth_mode": "none",
+      "channel_mode": "none",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1165.2250555555556,
+        "cloud_to_decision": 66.5835,
+        "edge_to_decision": 1231.8085555555556
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 6696,
+        "coap_posts": 26,
+        "coap_payload_bytes": 7034,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 10920,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 37,
+        "orchestrator_empty_polls": 19
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.9107707999646664
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.9291162998997606
+      }
+    },
+    {
+      "run": 3,
+      "auth_mode": "none",
+      "channel_mode": "none",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1197.3552222222222,
+        "cloud_to_decision": 63.38155555555556,
+        "edge_to_decision": 1260.736777777778
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 6696,
+        "coap_posts": 26,
+        "coap_payload_bytes": 7034,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 10920,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 36,
+        "orchestrator_empty_polls": 18
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.2304518000455573
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.2615591999492608
+      }
+    },
+    {
+      "run": 1,
+      "auth_mode": "ed25519",
+      "channel_mode": "x25519",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 559.6563333333334,
+        "cloud_to_decision": 74.23638888888888,
+        "edge_to_decision": 633.8927222222222
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 10344,
+        "coap_posts": 26,
+        "coap_payload_bytes": 10986,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 18094,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 15,
+        "orchestrator_empty_polls": 1
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.45061779994284734
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.4532422999618575
+      }
+    },
+    {
+      "run": 2,
+      "auth_mode": "ed25519",
+      "channel_mode": "x25519",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1021.8502777777778,
+        "cloud_to_decision": 64.93127777777778,
+        "edge_to_decision": 1086.7815555555555
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 10344,
+        "coap_posts": 26,
+        "coap_payload_bytes": 10986,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 18094,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 33,
+        "orchestrator_empty_polls": 15
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.9554714998812415
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.9839324000640772
+      }
+    },
+    {
+      "run": 3,
+      "auth_mode": "ed25519",
+      "channel_mode": "x25519",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1081.684888888889,
+        "cloud_to_decision": 65.99983333333333,
+        "edge_to_decision": 1147.6847222222223
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 10344,
+        "coap_posts": 26,
+        "coap_payload_bytes": 10986,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 18094,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 35,
+        "orchestrator_empty_polls": 17
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.9455773999798112
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 0.9143884000950493
+      }
+    },
+    {
+      "run": 1,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 536.341,
+        "cloud_to_decision": 82.64494444444445,
+        "edge_to_decision": 618.9859444444445
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 118980,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 12
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.0637626000097953
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.1519677999895066
+      }
+    },
+    {
+      "run": 2,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1490.512611111111,
+        "cloud_to_decision": 115.0745,
+        "edge_to_decision": 1605.5871111111112
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 118980,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 28,
+        "orchestrator_empty_polls": 11
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 3.1016835999907926
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 3.441311400034465
+      }
+    },
+    {
+      "run": 3,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1033.6205555555555,
+        "cloud_to_decision": 71.74544444444444,
+        "edge_to_decision": 1105.366
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 118980,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 32,
+        "orchestrator_empty_polls": 15
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 2.1085944999940693
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 2.2796229000086896
+      }
+    },
+    {
+      "run": 1,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "x25519+ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 542.7161111111111,
+        "cloud_to_decision": 79.63072222222222,
+        "edge_to_decision": 622.3468333333334
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 120060,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 12
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.17915079992963
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.2671382999396883
+      }
+    },
+    {
+      "run": 2,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "x25519+ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1331.5826666666667,
+        "cloud_to_decision": 82.81711111111112,
+        "edge_to_decision": 1414.399777777778
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 120060,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 36,
+        "orchestrator_empty_polls": 19
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 2.0766204999526963
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 2.3000306999892928
+      }
+    },
+    {
+      "run": 3,
+      "auth_mode": "ml-dsa-44",
+      "channel_mode": "x25519+ml-kem-768",
+      "incidents": 18,
+      "cloud_copies": 18,
+      "decisions": 18,
+      "latency_mean_ms": {
+        "edge_to_cloud": 1374.4538333333333,
+        "cloud_to_decision": 96.44572222222223,
+        "edge_to_decision": 1470.8995555555555
+      },
+      "messages": {
+        "mqttsn_publishes": 24,
+        "mqttsn_payload_bytes": 85752,
+        "coap_posts": 26,
+        "coap_payload_bytes": 92678,
+        "mcp_http_requests": 108,
+        "mcp_request_body_bytes": 120060,
+        "mcp_response_body_bytes": 28800,
+        "a2a_http_requests": 18,
+        "a2a_request_body_bytes": 10394,
+        "a2a_response_body_bytes": 12245,
+        "orchestrator_polls": 34,
+        "orchestrator_empty_polls": 17
+      },
+      "mqtt_collection": {
+        "messages_received": 24,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 1.913749800005462
+      },
+      "coap_collection": {
+        "messages_received": 25,
+        "batches_completed": 8,
+        "batch_assembly_seconds_total": 2.0786363999941386
+      }
+    }
+  ],
+  "note": "Les 24 répétitions ont été mesurées sous Windows ; le résumé a été recalculé à partir des mêmes répétitions avec la version de summarize_pq_b3.py qui ajoute médiane et étendue."
+}

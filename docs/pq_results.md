@@ -86,16 +86,31 @@ Mesures hors réseau sur une seule machine (Linux, Python 3.13.18, `cryptography
 | ML-KEM-768 + ML-DSA-44 | 6 260 octets | 0,756 ms | 0,203 ms |
 | Hybride X25519 + ML-KEM-768 + ML-DSA-44 | 6 322 octets | 0,709 ms | 0,242 ms |
 
+### Banc B3 en réseau local (IOT-178)
+
+Mesuré le 25 novembre 2026 sous Windows (Python 3.14.6), Mosquitto dans Docker, scrutation de 20 ms : 4 configurations × 2 tours entrelacés × 3 répétitions, soit 6 répétitions et 108 incidents par configuration. Fichier : `results/pq_b3_network_2026-11-25.json`.
+
+| Configuration | Livrés et décisions conformes | Edge → décision, médiane (min–max) | Charge MQTT-SN + CoAP par répétition | Corps HTTP vers MCP par répétition |
+|---|---:|---:|---:|---:|
+| C0 — sans protection | 108/108 | 719,69 ms (502,43–1 260,74) | 13 730 octets | 10 920 octets |
+| C1 — Ed25519 + X25519 | 108/108 | 677,55 ms (574,16–1 147,68) | 21 330 octets (× 1,55) | 18 094 octets (× 1,66) |
+| C2 — ML-DSA-44 + ML-KEM-768 | 108/108 | 1 120,84 ms (595,84–1 605,59) | 178 430 octets (× 13,0) | 118 980 octets (× 10,9) |
+| C2 hybride — ML-DSA-44 + X25519/ML-KEM-768 | 108/108 | 1 228,00 ms (622,35–1 470,90) | 178 430 octets (× 13,0) | 120 060 octets (× 11,0) |
+
+Aucun message légitime n'a été rejeté. Toutes les décisions sont conformes aux règles, y compris pour les incidents scellés qui passent par le vrai serveur MCP.
+
+**Lecture prudente des latences.** La variabilité du banc dépasse l'écart entre configurations. Dans chaque exécution de pytest, la première répétition donne de 595,84 à 804,71 ms dans les quatre configurations, C0 compris ; les répétitions suivantes dérivent jusqu'à 1 605,59 ms, C0 atteignant lui-même 1 260,74 ms. La dérive se situe sur le trajet Edge → Cloud (pont et appels MCP), tandis que le trajet Cloud → décision reste entre 63 et 115 ms. Les écarts de médiane (+401 ms pour C2) ne sont donc pas attribuables à la cryptographie avec ce banc ; le calcul ajouté mesuré hors réseau est d'environ 1,7 ms par incident. Le volume transmis, lui, est un effet net et reproductible : environ 13 fois plus d'octets vers l'Edge et 11 fois plus vers MCP avec ML-DSA-44.
+
 ## 4. Lecture des hypothèses
 
-- **H4 (coût)** : soutenue pour le calcul. Avec ML-DSA-44 et ML-KEM-768, le calcul ajouté sur toute la chaîne (signature, vérification, scellement, ouverture) est d'environ 1,7 ms par incident, soit 0,3 % des 516,67 ms de latence moyenne du banc B3 ; la taille est le vrai coût. La latence en réseau local reste à mesurer.
+- **H4 (coût)** : soutenue pour le calcul. Avec ML-DSA-44 et ML-KEM-768, le calcul ajouté sur toute la chaîne (signature, vérification, scellement, ouverture) est d'environ 1,7 ms par incident. En réseau local, l'effet sur la latence n'est pas distinguable de la variabilité du banc ; le coût net et mesurable est le volume : × 13 vers l'Edge et × 11 vers MCP. La latence en réseau local reste à mesurer.
 - **H5 (protection)** : soutenue dans la simulation. Contre un attaquant classique, Ed25519 protège autant que ML-DSA. L'avantage de ML-DSA face à un attaquant quantique découle de l'état de l'art et n'est pas mesurable ici.
 - **H6 (compromis FN-DSA)** : non testée, FN-DSA étant reporté.
 
 ## 5. Ce qui reste ouvert
 
-- Mesurer la latence du banc B3 en réseau local avec `AIOT_AUTH_MODE` et `AIOT_CHANNEL_MODE` actifs (`AIOT_TEST_NETWORK=1`), et refaire les mesures dans l'environnement de référence Windows.
-- Valider de bout en bout le passage d'un incident scellé par MCP.
+- Stabiliser le banc B3 (dérive du trajet Edge → Cloud au fil des répétitions d'un même processus) avant toute conclusion fine sur la latence.
+- Refaire les mesures hors réseau dans l'environnement de référence Windows.
 - Réduire la taille en remplaçant le double encodage base64 par un encodage binaire.
 - Intégrer la vérification des modèles à la distribution OTA (IOT-158).
 - FN-DSA (C3), si le temps le permet.
