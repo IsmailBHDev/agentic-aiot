@@ -289,6 +289,18 @@ def device_from_environment(device_dir):
     return DeviceOta(device_dir, algorithm, public_key)
 
 
+def cloud_signing_key():
+    """``(algorithme, clé privée du Cloud)`` selon AIOT_MODEL_SIGNING ; crée la clé si absente."""
+    algorithm = model_signing.model_signing_mode()
+    if algorithm == message_auth.NO_AUTH:
+        return algorithm, None
+    directory = message_auth.key_dir()
+    key_file = directory / f"{model_signing.CLOUD_KEY_NAME}.{algorithm}.key"
+    if not key_file.exists():
+        message_auth.create_keyring(algorithm, [model_signing.CLOUD_KEY_NAME], directory)
+    return algorithm, message_auth.load_private_key(algorithm, key_file.read_bytes())
+
+
 def main():
     import argparse
 
@@ -305,14 +317,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == "publish-reference":
-        algorithm = model_signing.model_signing_mode()
-        private_key = None
-        if algorithm != message_auth.NO_AUTH:
-            directory = message_auth.key_dir()
-            key_file = directory / f"{model_signing.CLOUD_KEY_NAME}.{algorithm}.key"
-            if not key_file.exists():
-                message_auth.create_keyring(algorithm, [model_signing.CLOUD_KEY_NAME], directory)
-            private_key = message_auth.load_private_key(algorithm, key_file.read_bytes())
+        algorithm, private_key = cloud_signing_key()
         model, _, _ = evaluate_tinyml.train_reference()
         path = publish_release(args.repo, model, args.version, algorithm, private_key,
                                {"source": "B1 de référence (max_depth=3, random_state=42)"})

@@ -1,0 +1,312 @@
+{
+  "ticket": "IOT-157",
+  "generated_at": "2026-11-25T22:22:22.289490+00:00",
+  "environment": {
+    "python": "3.14.6",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "scikit_learn": "1.9.1"
+  },
+  "sessions": {
+    "feedback": [
+      "feedback-seed-606",
+      "feedback-seed-707"
+    ],
+    "validation": "feedback-seed-808",
+    "test": "feedback-seed-909",
+    "historical_test_used": false
+  },
+  "collection": {
+    "feedback-seed-606": {
+      "measurements": 3000,
+      "incidents": 171,
+      "incidents_by_reason": {
+        "LOCAL_ML_ANOMALY": 168,
+        "SENSOR_INCONSISTENCY": 3
+      }
+    },
+    "feedback-seed-707": {
+      "measurements": 3000,
+      "incidents": 165,
+      "incidents_by_reason": {
+        "LOCAL_ML_ANOMALY": 162,
+        "SENSOR_INCONSISTENCY": 3
+      }
+    }
+  },
+  "incident_label_quality": {
+    "n": 6000,
+    "tp": 313,
+    "fp": 18,
+    "fn": 87,
+    "recall": 0.7825,
+    "precision": 0.9456
+  },
+  "active_v1": {
+    "model_sha256": "9765df6acb5d9364bde5cf4b98600574cfcfa42968826e4a4c05b52393012ca6",
+    "validation": {
+      "b1": {
+        "n": 3000,
+        "tp": 157,
+        "tn": 2791,
+        "fp": 9,
+        "fn": 43,
+        "f1": 0.8579,
+        "recall": 0.785,
+        "false_positive_rate": 0.0032
+      },
+      "b2": {
+        "n": 3000,
+        "tp": 199,
+        "tn": 2791,
+        "fp": 9,
+        "fn": 1,
+        "f1": 0.9755,
+        "recall": 0.995,
+        "false_positive_rate": 0.0032
+      },
+      "b1_by_scenario": {
+        "COMMON_VARIATION": {
+          "b1_detected": "0/0",
+          "b1_false_positives": 9
+        },
+        "CONTEXTUAL_ANOMALY": {
+          "b1_detected": "57/100",
+          "b1_false_positives": 0
+        },
+        "LOCAL_ANOMALY": {
+          "b1_detected": "100/100",
+          "b1_false_positives": 0
+        },
+        "NORMAL": {
+          "b1_detected": "0/0",
+          "b1_false_positives": 0
+        }
+      }
+    },
+    "test": {
+      "b1": {
+        "n": 3000,
+        "tp": 152,
+        "tn": 2788,
+        "fp": 12,
+        "fn": 48,
+        "f1": 0.8352,
+        "recall": 0.76,
+        "false_positive_rate": 0.0043
+      },
+      "b2": {
+        "n": 3000,
+        "tp": 198,
+        "tn": 2788,
+        "fp": 12,
+        "fn": 2,
+        "f1": 0.9659,
+        "recall": 0.99,
+        "false_positive_rate": 0.0043
+      },
+      "b1_by_scenario": {
+        "COMMON_VARIATION": {
+          "b1_detected": "0/0",
+          "b1_false_positives": 12
+        },
+        "CONTEXTUAL_ANOMALY": {
+          "b1_detected": "52/100",
+          "b1_false_positives": 0
+        },
+        "LOCAL_ANOMALY": {
+          "b1_detected": "100/100",
+          "b1_false_positives": 0
+        },
+        "NORMAL": {
+          "b1_detected": "0/0",
+          "b1_false_positives": 0
+        }
+      }
+    }
+  },
+  "candidates": {
+    "incidents": {
+      "label_source": "incidents",
+      "training_rows": 8400,
+      "feedback_rows": 6000,
+      "feedback_positive_labels": 331,
+      "dataset_sha256": "e4969a8b31baa328cb55ebd79d0ee33d0d674461f674538053460190e595b050",
+      "model_sha256": "50cbc3fee129b19fed5ae6fce708bdadddc89d05a5d0dbbe3d07bf5a8dc6fc92",
+      "nodes": 13,
+      "validation": {
+        "b1": {
+          "n": 3000,
+          "tp": 155,
+          "tn": 2795,
+          "fp": 5,
+          "fn": 45,
+          "f1": 0.8611,
+          "recall": 0.775,
+          "false_positive_rate": 0.0018
+        },
+        "b2": {
+          "n": 3000,
+          "tp": 199,
+          "tn": 2795,
+          "fp": 5,
+          "fn": 1,
+          "f1": 0.9851,
+          "recall": 0.995,
+          "false_positive_rate": 0.0018
+        },
+        "b1_by_scenario": {
+          "COMMON_VARIATION": {
+            "b1_detected": "0/0",
+            "b1_false_positives": 5
+          },
+          "CONTEXTUAL_ANOMALY": {
+            "b1_detected": "55/100",
+            "b1_false_positives": 0
+          },
+          "LOCAL_ANOMALY": {
+            "b1_detected": "100/100",
+            "b1_false_positives": 0
+          },
+          "NORMAL": {
+            "b1_detected": "0/0",
+            "b1_false_positives": 0
+          }
+        }
+      },
+      "promoted": true,
+      "test": {
+        "b1": {
+          "n": 3000,
+          "tp": 149,
+          "tn": 2793,
+          "fp": 7,
+          "fn": 51,
+          "f1": 0.8371,
+          "recall": 0.745,
+          "false_positive_rate": 0.0025
+        },
+        "b2": {
+          "n": 3000,
+          "tp": 198,
+          "tn": 2793,
+          "fp": 7,
+          "fn": 2,
+          "f1": 0.9778,
+          "recall": 0.99,
+          "false_positive_rate": 0.0025
+        },
+        "b1_by_scenario": {
+          "COMMON_VARIATION": {
+            "b1_detected": "0/0",
+            "b1_false_positives": 7
+          },
+          "CONTEXTUAL_ANOMALY": {
+            "b1_detected": "49/100",
+            "b1_false_positives": 0
+          },
+          "LOCAL_ANOMALY": {
+            "b1_detected": "100/100",
+            "b1_false_positives": 0
+          },
+          "NORMAL": {
+            "b1_detected": "0/0",
+            "b1_false_positives": 0
+          }
+        }
+      }
+    },
+    "annotated": {
+      "label_source": "annotated",
+      "training_rows": 8400,
+      "feedback_rows": 6000,
+      "feedback_positive_labels": 400,
+      "dataset_sha256": "1f100334cf89177917ce3788210819b959fa8f0cc518063121dec225f09e9377",
+      "model_sha256": "c3fa29afb27c3bbdf747cb90ee54549ed0ecad85401bb0d314d547db2a873da7",
+      "nodes": 15,
+      "validation": {
+        "b1": {
+          "n": 3000,
+          "tp": 162,
+          "tn": 2790,
+          "fp": 10,
+          "fn": 38,
+          "f1": 0.871,
+          "recall": 0.81,
+          "false_positive_rate": 0.0036
+        },
+        "b2": {
+          "n": 3000,
+          "tp": 199,
+          "tn": 2790,
+          "fp": 10,
+          "fn": 1,
+          "f1": 0.9731,
+          "recall": 0.995,
+          "false_positive_rate": 0.0036
+        },
+        "b1_by_scenario": {
+          "COMMON_VARIATION": {
+            "b1_detected": "0/0",
+            "b1_false_positives": 10
+          },
+          "CONTEXTUAL_ANOMALY": {
+            "b1_detected": "62/100",
+            "b1_false_positives": 0
+          },
+          "LOCAL_ANOMALY": {
+            "b1_detected": "100/100",
+            "b1_false_positives": 0
+          },
+          "NORMAL": {
+            "b1_detected": "0/0",
+            "b1_false_positives": 0
+          }
+        }
+      },
+      "promoted": true,
+      "test": {
+        "b1": {
+          "n": 3000,
+          "tp": 155,
+          "tn": 2789,
+          "fp": 11,
+          "fn": 45,
+          "f1": 0.847,
+          "recall": 0.775,
+          "false_positive_rate": 0.0039
+        },
+        "b2": {
+          "n": 3000,
+          "tp": 198,
+          "tn": 2789,
+          "fp": 11,
+          "fn": 2,
+          "f1": 0.9682,
+          "recall": 0.99,
+          "false_positive_rate": 0.0039
+        },
+        "b1_by_scenario": {
+          "COMMON_VARIATION": {
+            "b1_detected": "0/0",
+            "b1_false_positives": 11
+          },
+          "CONTEXTUAL_ANOMALY": {
+            "b1_detected": "55/100",
+            "b1_false_positives": 0
+          },
+          "LOCAL_ANOMALY": {
+            "b1_detected": "100/100",
+            "b1_false_positives": 0
+          },
+          "NORMAL": {
+            "b1_detected": "0/0",
+            "b1_false_positives": 0
+          }
+        }
+      }
+    }
+  },
+  "published": null
+}

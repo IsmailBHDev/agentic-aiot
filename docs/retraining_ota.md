@@ -3,6 +3,55 @@
 **Branche :** `feature/e13-retraining-ota`
 **Règles :** le seuil B2 de 2,50 °C, les données, les 600 décisions de référence et les fichiers du manifeste (dont `models/device_model.joblib`) ne sont pas modifiés ; les nouveaux résultats vont dans des fichiers datés.
 
+## IOT-157 — Réentraînement à partir des journaux de l'Edge
+
+**Résultat :** le pipeline construit un jeu de données à partir de ce que l'Edge a journalisé, réentraîne B1, n'accepte le candidat que s'il ne régresse pas en validation, et le publie par l'OTA avec les empreintes du modèle et des données. Sur la session de test tenue à l'écart, les deux candidats ne changent presque rien au B1 actif (F1 de 83,52 % à 83,71 % ou 84,70 %) : l'écart repose sur une seule session de 3 000 observations et n'est pas concluant. Le constat principal porte sur les étiquettes : les incidents de l'Edge sont surtout les alertes du B1 lui-même, et ne couvrent presque pas les anomalies contextuelles.
+
+### Pipeline (`src/retrain_b1.py`)
+
+| Étape | Contenu |
+|---|---|
+| Collecte | Sessions synthétiques nouvelles du générateur d'E07 (graines 606 et 707 pour le retour, 808 pour la validation, 909 pour le test), jamais utilisées par l'expérience historique ni par E07. Le capteur exécute la v1 ; chaque mesure passe par le vrai chemin Edge MQTT, qui journalise ses incidents. Le pipeline tient le journal de télémétrie de l'Edge (mesures reçues). |
+| Jeu de données | Jointure télémétrie × incidents par (session, itération, capteur). Étiquettes `incidents` : 1 si l'Edge a journalisé un incident (aucune intervention humaine). Étiquettes `annotated` : étiquette du générateur, qui simule un opérateur confirmant chaque mesure. |
+| Réentraînement | Entraînement historique (2 400 observations) + 6 000 observations de retour ; mêmes hyperparamètres que B1 (profondeur 3, graine 42), aucun réglage. |
+| Validation | Promotion si F1 de B1 sur la session 808 ≥ celui de la v1. |
+| Test | Session 909, utilisée seulement pour le rapport. Le test historique n'est jamais utilisé. |
+| Version | SHA-256 du jeu d'entraînement et du modèle ; avec `--publish-repo`, publication OTA du candidat promu sous la version suivante (signée selon `AIOT_MODEL_SIGNING`). |
+
+```text
+python -B src/retrain_b1.py --output artifacts/retraining.json --publish-repo artifacts/ota/repo
+```
+
+### Résultats (`results/retraining_b1_2026-11-25.json`)
+
+Mesuré sous Windows (Python 3.14.6, scikit-learn 1.9.1) le 25 novembre 2026. Le pipeline est déterministe.
+
+| Collecte (par session de retour) | 606 | 707 |
+|---|---:|---:|
+| Mesures journalisées | 3 000 | 3 000 |
+| Incidents `LOCAL_ML_ANOMALY` | 168 | 162 |
+| Incidents `SENSOR_INCONSISTENCY` | 3 | 3 |
+
+Qualité des étiquettes `incidents` sur les 6 000 mesures, contre l'annotation : précision 94,56 %, rappel 78,25 % (313 vrais positifs, 18 faux positifs, 87 anomalies sans incident).
+
+| Modèle | F1 validation (808) | F1 B1 test (909) | Faux positifs B1 test | Anomalies contextuelles détectées par B1 | F1 B2 test |
+|---|---:|---:|---:|---:|---:|
+| v1 active (B1 de référence) | 85,79 % | 83,52 % | 12 | 52/100 | 96,59 % |
+| Candidat `incidents` | 86,11 % (promu) | 83,71 % | 7 | 49/100 | 97,78 % |
+| Candidat `annotated` | 87,10 % (promu) | 84,70 % | 11 | 55/100 | 96,82 % |
+
+Les deux candidats détectent les 100 anomalies locales du test, comme la v1. F1 B2 : candidat combiné à la règle collaborative au seuil figé de 2,50 °C.
+
+**Lecture :**
+- **Les incidents sont une mauvaise source d'étiquettes pour B1.** 98 % d'entre eux sont des alertes `LOCAL_ML_ANOMALY` produites par la v1 : réentraîner sur ces étiquettes revient surtout à réapprendre la v1. Les incohérences collaboratives ne sont journalisées qu'une fois par capteur et par session, car le capteur est ensuite isolé logiquement : 3 incidents par session pour une centaine d'anomalies contextuelles.
+- **Un B1 local ne peut pas apprendre le contexte.** Les anomalies contextuelles dépendent des autres capteurs ; à partir de (température, vibration), aucun candidat ne dépasse 55/100. C'est le rôle de B2.
+- **Les écarts de F1 sont faibles et portent sur une seule session de test** : ils ne montrent pas qu'un candidat est meilleur. Le pipeline sert ici à démontrer la boucle complète (collecte, jeu de données, réentraînement, validation, version, OTA), pas un gain de détection.
+- La porte de promotion (≥) accepte un candidat équivalent ; une marge minimale ou plusieurs sessions de validation seraient plus prudentes.
+
+**Tests :** `tests/test_retrain_b1.py` (9 tests) — sessions distinctes du test historique et d'E07, jointure et étiquettes, collecte par l'Edge, qualité imparfaite des étiquettes `incidents`, règle de promotion, publication du candidat promu en v2 signée puis installation par un capteur en v1.
+
+**Limites :** l'annotation `annotated` utilise l'étiquette du générateur, ce qui suppose un opérateur parfait ; les sessions de retour viennent du même générateur que l'entraînement, sans dérive de distribution ; le journal de télémétrie est tenu par le pipeline, l'Edge actuel ne journalisant que les incidents.
+
 ## IOT-158 — OTA simulé
 
 **Résultat :** le Cloud publie des versions signées du modèle B1 ; le capteur simulé n'installe une version que si elle est plus récente, intacte, signée par le Cloud et fonctionnelle, et peut revenir à la version précédente. Avec une signature Ed25519 ou ML-DSA-44, les six scénarios d'attaque ou de panne testés laissent la version active intacte. Sans signature, un dépôt compromis fait installer un modèle empoisonné (F1 de 84,93 % à 0 %).

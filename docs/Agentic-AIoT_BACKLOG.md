@@ -293,7 +293,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
 
 ### E13 — Réentraînement et OTA simulé
 
-- [ ] **IOT-157 — Pipeline de ré-entraînement**
+- [x] **IOT-157 — Pipeline de ré-entraînement** Réf. : `src/retrain_b1.py`, `results/retraining_b1_2026-11-25.json`, `tests/test_retrain_b1.py` (9 tests), [`docs/retraining_ota.md`](retraining_ota.md). Sessions nouvelles (606, 707 retour ; 808 validation ; 909 test) rejouées par l'Edge ; jeu construit à partir des incidents journalisés ou d'une annotation simulée ; promotion si pas de régression en validation ; publication OTA signée avec empreintes. Résultat : écarts de F1 non concluants (83,52 % → 83,71 % / 84,70 % sur une session) ; les incidents sont à 98 % des alertes du B1 lui-même et l'isolement limite les incohérences à 3 par session.
   1. Construire un jeu de données à partir des incidents et décisions journalisés.
   2. Ré-entraîner l'arbre ; versionner le modèle avec son empreinte.
   3. Évaluer sur des sessions tenues à l'écart, jamais sur le test historique.
