@@ -280,7 +280,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
 
 ### E12 — Résilience et performances
 
-- [ ] **IOT-152 — Perte du Cloud**
+- [x] **IOT-152 — Perte du Cloud** Réf. : [`docs/resilience.md`](resilience.md), `tests/test_cloud_outage.py` (6 tests). L'Edge continue B1, B2 et la journalisation pendant la panne (600 décisions identiques) ; le pont transmet ensuite tous les incidents en attente, une fois chacun et dans l'ordre. Pont corrigé : position avancée par incident, fichier d'état optionnel pour la reprise, attente bornée, compteurs.
   1. Arrêter MCP et A2A pendant un rejeu.
   2. Vérifier que l'Edge continue B1, B2 et la journalisation.
   3. Relancer le Cloud et vérifier que le pont transmet les incidents en attente.
