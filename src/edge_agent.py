@@ -7,6 +7,8 @@ from math import isfinite
 from pathlib import Path
 from statistics import median
 
+import edge_policy
+
 # Chemin du fichier d'incidents
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 INCIDENT_FILE = Path(os.environ.get(
@@ -182,7 +184,11 @@ def analyze_devices(messages):
     print(f"\nEDGE : Médiane = {reference:.2f} °C")
 
     for device_id, decision in decisions.items():
-        if decision["collaborative_alert"] and device_id not in isolated_devices:
+        # IOT-159 : en report_all, un capteur déjà isolé reste journalisé
+        if decision["collaborative_alert"] and (
+            device_id not in isolated_devices
+            or edge_policy.reports_isolated_devices()
+        ):
 
             print(
                 f"EDGE : Incohérence détectée sur {device_id}"

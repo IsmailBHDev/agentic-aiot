@@ -3,13 +3,14 @@ import json
 import logging
 import time
 from collections import Counter
+import edge_policy
 from message_auth import AuthError, verifier_from_env
 from mqtt_bus import PahoBus
 from edge_agent import process_message, analyze_devices
 from telemetry import (
     CLEANUP_INTERVAL_SECONDS,
     EXPECTED_DEVICES,
-    ITERATION_TIMEOUT_SECONDS,
+    ITERATION_TIMEOUT_SECONDS,  # noqa: F401  (valeur historique, = politique par défaut)
     MESSAGE_RETENTION_SECONDS,
     is_message_fresh,
     validate_telemetry,
@@ -38,7 +39,8 @@ message_verifier = verifier_from_env(EXPECTED_DEVICES)
 def expire_iteration(key, current_time):
     """Clôture un lot arrivé à échéance, y compris entre deux scrutations."""
     start_time = iteration_start_times.get(key)
-    if start_time is None or current_time - start_time < ITERATION_TIMEOUT_SECONDS:
+    # IOT-159 : délai fixé par la politique Edge (5 s par défaut)
+    if start_time is None or current_time - start_time < edge_policy.batch_timeout_seconds():
         return
     batch = pending_iterations.pop(key)
     missing_devices = EXPECTED_DEVICES - batch.keys()
@@ -212,10 +214,12 @@ async def main():
         cleanup_expired_entries()
     )
 
+    policy = edge_policy.apply_from_environment()
     print("EDGE MQTT : En attente des mesures IoT...")
     print(
         f"EDGE MQTT : Timeout configure a "
-        f"{ITERATION_TIMEOUT_SECONDS} secondes"
+        f"{policy.batch_timeout_seconds} secondes "
+        f"(politique v{policy.version}, isolement {policy.isolation})"
     )
     print(
         f"EDGE MQTT : Nettoyage toutes les "

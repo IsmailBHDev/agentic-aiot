@@ -51,5 +51,10 @@ def validate_telemetry(message):
     prediction = payload["prediction"]
     if type(prediction) is not int or prediction not in (0, 1):
         raise ValueError("Invalid prediction")
+    # IOT-158 : version du modèle actif, facultative (absente hors OTA)
+    if "model_version" in payload:
+        version = payload["model_version"]
+        if type(version) is not int or version < 1:
+            raise ValueError("Invalid model_version")
 
     return (session_id, iteration), device_id, message_id

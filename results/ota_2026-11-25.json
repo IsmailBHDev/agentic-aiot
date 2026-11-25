@@ -1,0 +1,234 @@
+{
+  "ticket": "IOT-158",
+  "generated_at": "2026-11-25T22:18:06.530740+00:00",
+  "environment": {
+    "python": "3.14.6",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "scikit_learn": "1.9.1",
+    "cryptography": "50.0.2"
+  },
+  "reference_check": {
+    "retrained_matches_reference_predictions": true,
+    "reference_f1_test": 0.8493
+  },
+  "scenarios": {
+    "none": {
+      "install_reference_v1": {
+        "status": "installed",
+        "active_version": 1,
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "update_v2": {
+        "status": "installed",
+        "active_version": 2,
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "corrupted_in_transit": {
+        "status": "refused",
+        "active_version": 1,
+        "reason": "digest_mismatch",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "poisoned_repository": {
+        "status": "installed",
+        "active_version": 2,
+        "agreement_with_reference_b1": 567,
+        "f1_test": 0.0
+      },
+      "unsigned_release": {
+        "status": "installed",
+        "active_version": 2,
+        "agreement_with_reference_b1": 567,
+        "f1_test": 0.0
+      },
+      "disguised_downgrade": {
+        "status": "installed",
+        "active_version": 3,
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "older_catalog": {
+        "status": "refused",
+        "active_version": 2,
+        "reason": "not_newer",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "incompatible_model": {
+        "status": "refused",
+        "active_version": 1,
+        "reason": "health_check_failed",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "rollback_then_update": {
+        "status": "up_to_date",
+        "active_version": 1,
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493,
+        "rejected_versions": [
+          2
+        ]
+      }
+    },
+    "ed25519": {
+      "install_reference_v1": {
+        "status": "installed",
+        "active_version": 1,
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "update_v2": {
+        "status": "installed",
+        "active_version": 2,
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "corrupted_in_transit": {
+        "status": "refused",
+        "active_version": 1,
+        "reason": "digest_mismatch",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "poisoned_repository": {
+        "status": "refused",
+        "active_version": 1,
+        "reason": "bad_signature",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "unsigned_release": {
+        "status": "refused",
+        "active_version": 1,
+        "reason": "bad_signature",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "disguised_downgrade": {
+        "status": "refused",
+        "active_version": 2,
+        "reason": "bad_signature",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "older_catalog": {
+        "status": "refused",
+        "active_version": 2,
+        "reason": "not_newer",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "incompatible_model": {
+        "status": "refused",
+        "active_version": 1,
+        "reason": "health_check_failed",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "rollback_then_update": {
+        "status": "up_to_date",
+        "active_version": 1,
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493,
+        "rejected_versions": [
+          2
+        ]
+      }
+    },
+    "ml-dsa-44": {
+      "install_reference_v1": {
+        "status": "installed",
+        "active_version": 1,
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "update_v2": {
+        "status": "installed",
+        "active_version": 2,
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "corrupted_in_transit": {
+        "status": "refused",
+        "active_version": 1,
+        "reason": "digest_mismatch",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "poisoned_repository": {
+        "status": "refused",
+        "active_version": 1,
+        "reason": "bad_signature",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "unsigned_release": {
+        "status": "refused",
+        "active_version": 1,
+        "reason": "bad_signature",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "disguised_downgrade": {
+        "status": "refused",
+        "active_version": 2,
+        "reason": "bad_signature",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "older_catalog": {
+        "status": "refused",
+        "active_version": 2,
+        "reason": "not_newer",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "incompatible_model": {
+        "status": "refused",
+        "active_version": 1,
+        "reason": "health_check_failed",
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493
+      },
+      "rollback_then_update": {
+        "status": "up_to_date",
+        "active_version": 1,
+        "agreement_with_reference_b1": 600,
+        "f1_test": 0.8493,
+        "rejected_versions": [
+          2
+        ]
+      }
+    }
+  },
+  "cost": {
+    "none": {
+      "model_bytes": 2761,
+      "signature_file_bytes": 0,
+      "install_ms_mean": 5.253,
+      "install_ms_median": 5.266,
+      "signature_verify_ms_mean": null,
+      "repetitions": 20
+    },
+    "ed25519": {
+      "model_bytes": 2761,
+      "signature_file_bytes": 263,
+      "install_ms_mean": 17.047,
+      "install_ms_median": 6.795,
+      "signature_verify_ms_mean": 0.371,
+      "repetitions": 20
+    },
+    "ml-dsa-44": {
+      "model_bytes": 2761,
+      "signature_file_bytes": 3405,
+      "install_ms_mean": 9.79,
+      "install_ms_median": 6.968,
+      "signature_verify_ms_mean": 0.368,
+      "repetitions": 20
+    }
+  }
+}

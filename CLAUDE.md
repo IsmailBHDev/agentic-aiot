@@ -33,6 +33,7 @@ $env:AIOT_TEST_NETWORK = '1'                       # active les tests réseau (B
 - `docs/research_delivery.md`, `docs/experimental_protocol.md`, `docs/literature_review.md` — axe 1
 - `docs/pq_threat_model.md`, `docs/pq_library_choice.md`, `docs/pq_results.md` — axe 2 (post-quantique)
 - `docs/resilience.md` — E12 (perte du Cloud, pertes Device → Edge, surcharge, benchmark, TinyML)
+- `docs/retraining_ota.md` — E13 (réentraînement, OTA signé, politique Edge signée)
 - Rapport de recherche : https://claude.ai/artifact/TnoPimKtFT2AXbGLXx8Ank (onglets Rapport et Backlog)
 
 ## État au 25 novembre 2026
