@@ -110,3 +110,37 @@ Ces temps Python ne représentent pas un microcontrôleur ; seuls les tailles et
 **Constat à traiter :** le modèle chargé par le simulateur (`models/device_model.joblib`) n'est pas le B1 évalué. C'est un arbre à une seule comparaison (température > 33,01 °C), qui atteint un F1 de 66,67 % sur le test et diffère du B1 de référence sur 13 des 600 observations. Les résultats B1/B2 du rapport ne sont pas affectés, puisqu'ils utilisent le B1 de référence, mais le prototype de bout en bout utilise un modèle plus faible. Ce fichier figurant dans le manifeste de reproduction, il n'a pas été modifié : voir IOT-180.
 
 **Tests :** `tests/test_tinyml.py` (7 tests) — reproduction de la référence, accord total des variantes compressées, réduction des nœuds et des octets, élagage sans effet sur les prédictions, signalement du modèle du simulateur.
+
+## IOT-155 — Benchmark des trois niveaux
+
+**Résultat :** à chaque niveau, le calcul prend moins d'une demi-milliseconde par message ou par incident, signatures et chiffrement post-quantiques compris. Dans le banc, la latence de bout en bout (environ 0,7 à 1,2 s) vient presque entièrement du trajet Edge → Cloud, c'est-à-dire du pont et des appels MCP, et non du calcul.
+
+**Protocole (`src/evaluate_tiers.py`) :** 1 000 opérations par mesure (200 lots pour B2), hors réseau, sous Windows (Python 3.14.6, scikit-learn 1.9.1, `cryptography` 50.0.2), le 25 novembre 2026. Les latences réseau sont les médianes du banc B3 du même jour. Résultats : `results/tiers_benchmark_2026-11-25.json`.
+
+| Niveau | Opération | Moyenne | Médiane | p95 |
+|---|---|---:|---:|---:|
+| Device | Inférence B1 (DataFrame + `predict`, comme le simulateur) | 0,336 ms | 0,317 ms | 0,413 ms |
+| Device | Signature ML-DSA-44 d'un message | 0,345 ms | 0,264 ms | 0,802 ms |
+| Edge | Traitement d'un message, C0 | 0,039 ms | 0,011 ms | 0,303 ms |
+| Edge | Traitement d'un message, vérification ML-DSA-44 | 0,127 ms | 0,095 ms | 0,370 ms |
+| Edge | Calcul B2 d'un lot de trois mesures | 0,003 ms | 0,003 ms | 0,004 ms |
+| Cloud | Enregistrement d'un incident (fichier JSONL) | 0,302 ms | 0,283 ms | 0,425 ms |
+| Cloud | Ouverture d'un incident scellé (ML-KEM-768 + ML-DSA-44) | 0,147 ms | 0,139 ms | 0,164 ms |
+| Cloud | Analyse A2A à règles (`rule_based_v1`) | 0,0005 ms | 0,0005 ms | 0,0005 ms |
+| Cloud | Agent superviseur RAG | à venir (E14) | | |
+
+Modèle B1 du simulateur : 1 801 octets, chargé en 902 ms au démarrage (import de scikit-learn compris, une seule fois).
+
+| Banc B3 en réseau local (médianes) | Edge → Cloud | Cloud → décision | Edge → décision |
+|---|---:|---:|---:|
+| C0 — sans protection | 653,22 ms | 67,52 ms | 719,69 ms |
+| C1 — Ed25519 + X25519 | 594,60 ms | 80,43 ms | 677,55 ms |
+| C2 — ML-DSA-44 + ML-KEM-768 | 1 045,16 ms | 82,04 ms | 1 120,84 ms |
+| C2 hybride | 1 154,51 ms | 78,40 ms | 1 228,00 ms |
+
+**Lecture :**
+- Le calcul cumulé d'un incident sur les trois niveaux reste de l'ordre de la milliseconde, alors que le trajet Edge → Cloud prend plusieurs centaines de millisecondes : c'est le maillon à optimiser (scrutation, session MCP ouverte à chaque incident), pas la détection ni la cryptographie.
+- Comme indiqué pour IOT-178, les écarts de latence réseau entre configurations ne sont pas séparables de la variabilité du banc.
+- Au Device, l'appel via DataFrame domine l'inférence ; la table compacte d'IOT-156 la réduirait à quelques microsecondes.
+
+**Tests :** `tests/test_tiers.py` (1 test) — chaque niveau est mesuré ; l'analyse A2A est ignorée proprement si FastAPI est absent.
