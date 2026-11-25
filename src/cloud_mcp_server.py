@@ -1,4 +1,6 @@
 """Cloud MCP server: Streamable HTTP on http://127.0.0.1:8000/mcp."""
+import os
+
 from mcp.server.fastmcp import FastMCP
 from cloud_store import report_incident as save_report, list_incidents as read_reports
 from cloud_store import request_model_update as acknowledge_update
@@ -19,8 +21,12 @@ def request_model_update(device_id: str) -> dict:
 
 
 def create_mcp():
+    # IOT-166 : AIOT_MCP_HOST=0.0.0.0 dans un conteneur ; 127.0.0.1 par défaut
     server = FastMCP(
-        'agentic-aiot-cloud', host='127.0.0.1', port=8000, streamable_http_path='/mcp'
+        'agentic-aiot-cloud',
+        host=os.environ.get('AIOT_MCP_HOST', '127.0.0.1'),
+        port=int(os.environ.get('AIOT_MCP_PORT', '8000')),
+        streamable_http_path='/mcp',
     )
     server.tool()(report_incident)
     server.tool()(list_incidents)

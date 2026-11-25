@@ -37,6 +37,38 @@ The system simulates three industrial IoT devices and an Edge Coordinator. Each 
 
 Performance measurements were obtained from the Python simulation environment. They do not represent ESP32 hardware benchmarks.
 
+## Run the whole chain with Docker
+
+One command starts the broker, the Edge (MQTT-SN gateway, MQTT adapter, CoAP
+server, Edge→Cloud bridge) and the Cloud (MCP server, A2A service,
+orchestrator). Requires Docker with Compose; ports are published on
+127.0.0.1 only.
+
+```bash
+docker compose up -d --build                  # Edge + Cloud + broker
+docker compose --profile demo run --rm device-sim   # 10 iterations of 3 simulated sensors
+docker compose logs -f edge-mqtt cloud-orchestrator # follow incidents and decisions
+docker compose down                           # stop while keeping the Edge/Cloud logs
+```
+
+| Service | Role | Port on 127.0.0.1 |
+|---|---|---|
+| `mosquitto` | MQTT broker | 1883/tcp |
+| `edge-gateway` | MQTT-SN → MQTT gateway | 10000/udp |
+| `edge-mqtt`, `edge-coap` | B2 Edge over MQTT and CoAP | 5683/udp (CoAP) |
+| `edge-bridge` | Edge incidents → MCP, resumes from a state file | — |
+| `cloud-mcp`, `cloud-a2a`, `cloud-orchestrator` | Cloud storage, rule-based analysis, decisions | 8000, 9000 |
+| `device-sim` (profile `demo`) | Three simulated sensors | — |
+
+Edge incidents and Cloud incidents/decisions are kept in the named volumes
+`edge-data` and `cloud-data` (`/data/edge`, `/data/cloud` in the containers).
+Use `docker compose down -v` only when those journals can be deleted.
+The security options (`AIOT_AUTH_MODE`, `AIOT_CHANNEL_MODE`,
+`AIOT_MODEL_SIGNING`, `AIOT_EDGE_POLICY_FILE`) stay off by default; enabling
+them in containers also requires mounting the keys (`AIOT_KEY_DIR`).
+`docker compose up -d mosquitto` still starts the broker alone for the
+network tests.
+
 ## Installation
 
 Install the required dependencies:

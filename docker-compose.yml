@@ -1,10 +1,113 @@
+# IOT-166 : toute la chaîne Device -> Edge -> Cloud en une commande.
+#
+#   docker compose up -d --build                    # Edge + Cloud (+ broker)
+#   docker compose --profile demo up device-sim     # 10 itérations de 3 capteurs simulés
+#   docker compose down -v                          # arrêt et effacement des journaux
+#
+# `docker compose up -d mosquitto` démarre toujours le broker seul (tests réseau).
+# Les ports ne sont publiés que sur 127.0.0.1.
+
+x-app: &app
+  build:
+    context: .
+    dockerfile: docker/app.Dockerfile
+  image: agentic-aiot-app:local
+  restart: unless-stopped
+  environment: &app-env
+    AIOT_EDGE_INCIDENT_FILE: /data/edge/incidents.jsonl
+    AIOT_CLOUD_INCIDENT_FILE: /data/cloud/cloud_incidents.jsonl
+    AIOT_CLOUD_DECISION_FILE: /data/cloud/cloud_decisions.jsonl
+    MQTT_HOST: mosquitto
+    MQTT_PORT: "1883"
 
 services:
   mosquitto:
     image: eclipse-mosquitto:2
-    container_name: agentic-aiot-mosquitto
     ports:
       - "127.0.0.1:1883:1883"
     volumes:
       - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
     restart: unless-stopped
+
+  # ---------------------------------------------------------------- Cloud
+  cloud-mcp:
+    <<: *app
+    command: ["python", "src/cloud_mcp_server.py"]
+    environment:
+      <<: *app-env
+      AIOT_MCP_HOST: 0.0.0.0
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - cloud-data:/data/cloud
+
+  cloud-a2a:
+    <<: *app
+    command: ["python", "-m", "uvicorn", "cloud_a2a_server:app", "--app-dir", "src",
+              "--host", "0.0.0.0", "--port", "9000"]
+    ports:
+      - "127.0.0.1:9000:9000"
+
+  cloud-orchestrator:
+    <<: *app
+    command: ["python", "src/cloud_orchestrator.py", "--watch"]
+    environment:
+      <<: *app-env
+      AIOT_A2A_URL: http://cloud-a2a:9000/
+    volumes:
+      - cloud-data:/data/cloud
+    depends_on: [cloud-a2a, cloud-mcp]
+
+  # ---------------------------------------------------------------- Edge
+  edge-gateway:
+    <<: *app
+    command: ["python", "src/mqttsn_gateway.py"]
+    ports:
+      - "127.0.0.1:10000:10000/udp"
+    depends_on: [mosquitto]
+
+  edge-mqtt:
+    <<: *app
+    command: ["python", "src/mqtt_edge_adapter.py"]
+    volumes:
+      - edge-data:/data/edge
+    depends_on: [mosquitto]
+
+  edge-coap:
+    <<: *app
+    command: ["python", "src/coap_server.py"]
+    environment:
+      <<: *app-env
+      AIOT_COAP_HOST: 0.0.0.0
+    ports:
+      - "127.0.0.1:5683:5683/udp"
+    volumes:
+      - edge-data:/data/edge
+
+  edge-bridge:
+    <<: *app
+    command: ["python", "src/edge_cloud_bridge.py", "--watch"]
+    environment:
+      <<: *app-env
+      AIOT_MCP_URL: http://cloud-mcp:8000/mcp
+      # Reprise après redémarrage sans perte ni doublon (IOT-152)
+      AIOT_BRIDGE_STATE_FILE: /data/edge/bridge_state.json
+    volumes:
+      - edge-data:/data/edge
+    depends_on: [cloud-mcp, edge-mqtt, edge-coap]
+
+  # ---------------------------------------------------------------- Device
+  device-sim:
+    <<: *app
+    profiles: [demo]
+    restart: "no"
+    command: ["python", "src/device_simulator.py"]
+    environment:
+      <<: *app-env
+      MQTTSN_HOST: edge-gateway
+      MQTTSN_PORT: "10000"
+    depends_on: [edge-gateway, edge-mqtt]
+
+volumes:
+  edge-data:
+  cloud-data:

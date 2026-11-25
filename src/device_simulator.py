@@ -56,10 +56,11 @@ print("Modèle ML chargé avec succès")
 EDGE_HOST = "127.0.0.1"
 EDGE_PORT = 5000
 
-COAP_URL = "coap://127.0.0.1:5683/telemetry"
+COAP_URL = os.environ.get("AIOT_COAP_URL", "coap://127.0.0.1:5683/telemetry")
 
-MQTTSN_HOST = "127.0.0.1"
-MQTTSN_PORT = 10000
+# IOT-166 : configurables pour les conteneurs ; valeurs historiques par défaut
+MQTTSN_HOST = os.environ.get("MQTTSN_HOST", "127.0.0.1")
+MQTTSN_PORT = int(os.environ.get("MQTTSN_PORT", "10000"))
 
 latencies = []
 

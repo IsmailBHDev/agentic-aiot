@@ -1,6 +1,7 @@
 
 import asyncio
 import json
+import os
 import time
 from collections import Counter
 
@@ -20,8 +21,9 @@ from telemetry import (
     validate_telemetry,
 )
 
-HOST = "127.0.0.1"
-PORT = 5683
+# IOT-166 : configurables pour les conteneurs ; valeurs historiques par défaut
+HOST = os.environ.get("AIOT_COAP_HOST", "127.0.0.1")
+PORT = int(os.environ.get("AIOT_COAP_PORT", "5683"))
 
 class HealthResource(resource.Resource):
 
