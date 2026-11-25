@@ -4,6 +4,7 @@ import time
 import json
 import uuid
 import math
+import os
 import socket
 import asyncio
 from datetime import datetime, timezone
@@ -35,8 +36,20 @@ device_states = {
 BASE_DIR = Path(__file__).resolve().parent.parent
 MODEL_FILE = BASE_DIR / "models" / "device_model.joblib"
 
-# IOT-176 : signature vérifiée avant chargement si AIOT_MODEL_SIGNING est actif
-model = load_model(MODEL_FILE)
+# IOT-158 : si AIOT_OTA_DEVICE_DIR est défini, le modèle actif installé par
+# l'OTA simulé est chargé (signature revérifiée) et sa version est ajoutée à
+# la télémétrie. Sinon, comportement historique : modèle de référence du dépôt.
+OTA_DEVICE_DIR = os.environ.get("AIOT_OTA_DEVICE_DIR")
+MODEL_VERSION = None
+if OTA_DEVICE_DIR:
+    import ota
+
+    _ota_agent = ota.device_from_environment(OTA_DEVICE_DIR)
+    model, MODEL_VERSION = _ota_agent.load_active()
+    MODEL_FILE = _ota_agent.slots / ota.release_file(MODEL_VERSION)
+else:
+    # IOT-176 : signature vérifiée avant chargement si AIOT_MODEL_SIGNING est actif
+    model = load_model(MODEL_FILE)
 
 print("Modèle ML chargé avec succès")
 
@@ -229,6 +242,8 @@ def simulate_device(device_id, iteration):
     message["payload"]["inference_ms"] = round(
         inference_ms, 4
     )
+    if MODEL_VERSION is not None:
+        message["payload"]["model_version"] = MODEL_VERSION
 
     return message
 
