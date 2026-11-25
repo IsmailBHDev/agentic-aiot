@@ -37,17 +37,15 @@ $env:AIOT_TEST_NETWORK = '1'                       # active les tests réseau (B
 
 ## État au 25 novembre 2026
 
-- Terminé et fusionné : E00–E11, E16 (IOT-172 à IOT-179, PR #16 à #18).
-- Terminé sur la branche `feature/e12-resilience` (6 commits locaux, à pousser) : IOT-152 à IOT-156.
+- Terminé et fusionné : E00–E11, E16 (IOT-172 à IOT-179, PR #16 à #18), E12 (IOT-152 à IOT-156, PR #19).
 - Questions de recherche proposées : QR1 détection collaborative, QR2 coût et protection post-quantiques (H4–H6) ; formulation à valider avec le professeur.
 
 ## Prochaines étapes
 
-1. Pousser `feature/e12-resilience` et ouvrir la PR.
-2. IOT-180 : `models/device_model.joblib` (simulateur) n'est pas le B1 évalué (une comparaison, F1 66,67 %) — décider : remplacer (nouvelle version du manifeste) ou documenter.
-3. Reporter E12 dans le rapport.
-4. E13 : ré-entraînement et OTA simulé (IOT-157 à IOT-159), puis E14 (RAG minimal) et E15 (livraison).
-5. En attente du professeur : formulation QR1/QR2, périmètre du RAG, canevas Word du rapport (IOT-129).
+1. IOT-180 : `models/device_model.joblib` (simulateur) n'est pas le B1 évalué (une comparaison, F1 66,67 %) — décider : remplacer (nouvelle version du manifeste) ou documenter.
+2. Reporter E12 dans le rapport.
+3. E13 : ré-entraînement et OTA simulé (IOT-157 à IOT-159), puis E14 (RAG minimal) et E15 (livraison).
+4. En attente du professeur : formulation QR1/QR2, périmètre du RAG, canevas Word du rapport (IOT-129).
 
 ## Points connus
 
