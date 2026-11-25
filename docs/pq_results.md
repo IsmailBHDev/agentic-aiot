@@ -103,7 +103,7 @@ Aucun message légitime n'a été rejeté. Toutes les décisions sont conformes 
 
 ## 4. Lecture des hypothèses
 
-- **H4 (coût)** : soutenue pour le calcul. Avec ML-DSA-44 et ML-KEM-768, le calcul ajouté sur toute la chaîne (signature, vérification, scellement, ouverture) est d'environ 1,7 ms par incident. En réseau local, l'effet sur la latence n'est pas distinguable de la variabilité du banc ; le coût net et mesurable est le volume : × 13 vers l'Edge et × 11 vers MCP. La latence en réseau local reste à mesurer.
+- **H4 (coût)** : soutenue pour le calcul. Avec ML-DSA-44 et ML-KEM-768, le calcul ajouté sur toute la chaîne (signature, vérification, scellement, ouverture) est d'environ 1,7 ms par incident. En réseau local, l'effet sur la latence n'est pas distinguable de la variabilité du banc ; le coût net et mesurable est le volume : × 13 vers l'Edge et × 11 vers MCP. Une conclusion fine sur la latence exige d'abord un banc stabilisé (section 5).
 - **H5 (protection)** : soutenue dans la simulation. Contre un attaquant classique, Ed25519 protège autant que ML-DSA. L'avantage de ML-DSA face à un attaquant quantique découle de l'état de l'art et n'est pas mesurable ici.
 - **H6 (compromis FN-DSA)** : non testée, FN-DSA étant reporté.
 

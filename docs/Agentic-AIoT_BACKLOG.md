@@ -1,6 +1,6 @@
 # Agentic-AIoT — Backlog produit et scientifique complet
 
-**Version :** 1.1 — 23 novembre 2026
+**Version :** 1.2 — 25 novembre 2026 (E12 fusionné, PR #19)
 
 **Projet :** Architecture collaborative Edge–Cloud pour la détection d’anomalies dans les systèmes IoT
 
@@ -79,6 +79,12 @@ B2 est validée hors ligne et le test de parité reproduit les 600 décisions au
 | E08 | État de l'art et positionnement scientifique | Revue ciblée et citations livrées | P1 |
 | E09 | Rapport, article IEEE et démonstration | Rapport, figures et démonstration livrés ; canevas et manuscrit ouverts | P1 |
 | E10 | CI, documentation technique et livraison | CI et tag publiés ; revue de PR formelle non établie | P2 |
+| E11 | Reprise et gouvernance | Réalisé (PR #14) | — |
+| E16 | Axe post-quantique | Réalisé (PR #16 à #18) ; FN-DSA (C3) reporté | — |
+| E12 | Résilience et performances | IOT-152 à IOT-156 réalisés (PR #19) ; IOT-180 ouvert | P1 |
+| E13 | Réentraînement et OTA simulé | À faire | P1 |
+| E14 | RAG minimal | À faire ; périmètre à confirmer avec le professeur | P2 |
+| E15 | Démonstration et livraison finale | À faire | P1 |
 
 **Statuts** : `[x]` terminé sur la base des échanges/résultats ; `[~]` partiel ou à vérifier ; `[ ]` non terminé.
 
@@ -407,7 +413,7 @@ agentic-aiot/
 └── README-CLOUD-MVP.md
 ```
 
-Les fichiers `docs/` autres que `PROJECT_BACKLOG.md` sont **proposés**, non réputés déjà présents.
+Cette structure est une **proposition initiale**. Dans le dépôt actuel, le backlog est `docs/Agentic-AIoT_BACKLOG.md` ; les autres documents existants sont `research_delivery.md`, `experimental_protocol.md`, `literature_review.md`, `pq_threat_model.md`, `pq_library_choice.md`, `pq_results.md` et `resilience.md`. `PROJECT_CONTEXT.md`, `architecture.md` et `decisions/` n'existent pas (le registre ADR d'IOT-008 reste ouvert).
 
 ## 8. Consigne initiale prête à adresser à Codex
 

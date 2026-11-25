@@ -1,6 +1,7 @@
 # E12 — Résilience et performances
 
-**Branche :** `feature/e12-resilience`
+**Branche :** `feature/e12-resilience`, fusionnée dans `main` (PR #19)
+**Environnements :** IOT-153, IOT-154 et IOT-156 mesurés dans l'environnement de vérification Linux (Python 3.13.18) ; IOT-155 sous Windows (Python 3.14.6)
 **Règles :** le seuil B2 de 2,50 °C, les données et les résultats historiques ne sont pas modifiés ; les nouveaux résultats vont dans des fichiers séparés.
 
 ## IOT-152 — Perte du Cloud
