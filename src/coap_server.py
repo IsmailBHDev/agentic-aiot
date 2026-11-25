@@ -5,6 +5,7 @@ import time
 from collections import Counter
 
 from aiocoap import resource, Message, Code, Context
+import edge_policy
 from message_auth import AuthError, verifier_from_env
 from edge_agent import (
     process_message,
@@ -14,7 +15,6 @@ from edge_agent import (
 from telemetry import (
     CLEANUP_INTERVAL_SECONDS,
     EXPECTED_DEVICES,
-    ITERATION_TIMEOUT_SECONDS,
     MESSAGE_RETENTION_SECONDS,
     is_message_fresh,
     validate_telemetry,
@@ -51,7 +51,8 @@ class TelemetryResource(resource.Resource):
 
     def expire_batch(self, key, now):
         started, batch = self.pending[key]
-        if now - started >= ITERATION_TIMEOUT_SECONDS:
+        # IOT-159 : délai fixé par la politique Edge (5 s par défaut)
+        if now - started >= edge_policy.batch_timeout_seconds():
             del self.pending[key]
             self.closed[key] = now
             missing_devices = EXPECTED_DEVICES - batch.keys()
@@ -234,6 +235,11 @@ async def main():
         bind=(HOST, PORT)
     )
 
+    policy = edge_policy.apply_from_environment()
+    print(
+        f"COAP EDGE : politique v{policy.version}, timeout "
+        f"{policy.batch_timeout_seconds} s, isolement {policy.isolation}"
+    )
     print(
         f"COAP EDGE : Serveur demarre sur "
         f"coap://{HOST}:{PORT}/telemetry"

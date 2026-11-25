@@ -1,4 +1,4 @@
-# E13 — Réentraînement et OTA simulé
+# E13 — Réentraînement, OTA simulé et règles Edge
 
 **Branche :** `feature/e13-retraining-ota`
 **Règles :** le seuil B2 de 2,50 °C, les données, les 600 décisions de référence et les fichiers du manifeste (dont `models/device_model.joblib`) ne sont pas modifiés ; les nouveaux résultats vont dans des fichiers datés.
@@ -120,3 +120,67 @@ Le modèle empoisonné est un arbre valide qui répond toujours 0 : il masque to
 - Les trois capteurs du simulateur partagent un même processus, donc un même modèle actif.
 - Pas de protection contre un attaquant qui retient indéfiniment les mises à jour (gel) : le capteur reste sur sa version active.
 - Les durées sont mesurées sur PC ; elles ne représentent pas un microcontrôleur.
+
+## IOT-159 — Règles de l'Edge ajustées depuis le Cloud
+
+**Résultat :** le Cloud ajuste deux règles de l'Edge par une politique signée et numérotée : le délai d'expiration des lots et la politique d'isolement. Le seuil B2 de 2,50 °C n'est pas ajustable : une politique qui le contient est refusée. Dans les 8 combinaisons testées, les 600 décisions B2 du test historique restent identiques. La politique `report_all` fait passer la couverture des anomalies contextuelles par les incidents de 3/100 à 98/100, et un délai de 10 s rend tous les lots complets malgré 20 % de messages en retard.
+
+### Fonctionnement (`src/edge_policy.py`)
+
+| Champ | Valeurs | Historique |
+|---|---|---|
+| `version` | entier ≥ 1, strictement croissant | 0 (aucune politique) |
+| `batch_timeout_seconds` | 1 à 60 s, appliqué par MQTT et CoAP | 5 s |
+| `isolation` | `isolate_once` : un capteur isolé ne produit plus d'incident collaboratif dans sa session ; `report_all` : il reste isolé, mais chaque incohérence est journalisée | `isolate_once` |
+
+Tout autre champ est refusé (`forbidden_field`). L'Edge vérifie la signature du Cloud (Ed25519 ou ML-DSA-44), la version et les bornes, puis applique la politique d'un bloc ; tout refus laisse la politique active inchangée. L'isolement n'agit que sur la journalisation des incidents, pas sur les décisions B2.
+
+```text
+python src/edge_policy.py artifacts/edge_policy.json --version 1 --batch-timeout 10 --isolation report_all --algorithm ml-dsa-44
+$env:AIOT_EDGE_POLICY_FILE = 'artifacts/edge_policy.json'
+$env:AIOT_POLICY_SIGNING = 'ml-dsa-44'
+python src/mqtt_edge_adapter.py      # ou src/coap_server.py : la politique est appliquée au démarrage
+```
+
+### Évaluation (`src/evaluate_edge_policy.py`)
+
+Mesure sous Windows (Python 3.14.6) le 25 novembre 2026. Résultats : `results/edge_policy_2026-11-25.json`.
+
+| Distribution de la politique | Sans signature | Ed25519 | ML-DSA-44 |
+|---|---|---|---|
+| Politique légitime | appliquée | appliquée | appliquée |
+| Délai modifié après signature | **appliquée** | refusée (signature) | refusée (signature) |
+| Seuil B2 ajouté au document | refusée (champ interdit) | refusée (signature) | refusée (signature) |
+| Délai hors bornes, signé par le Cloud | refusée (bornes) | refusée (bornes) | refusée (bornes) |
+| Version plus ancienne que l'active | refusée | refusée | refusée |
+| Signée par un tiers / non signée | — | refusées (signature) | refusées (signature) |
+
+Le Cloud lui-même ne peut pas publier une politique qui contient un seuil.
+
+**Non-régression :** test historique rejoué par le vrai chemin Edge MQTT avec chaque délai (1, 2, 5, 10 s) et chaque isolement : 600/600 décisions B2 conformes dans les 8 cas. Incidents collaboratifs journalisés : 3 en `isolate_once`, 39 en `report_all`.
+
+**Isolement**, session 909 (B1 de référence) :
+
+| | `isolate_once` | `report_all` |
+|---|---:|---:|
+| Incidents `SENSOR_INCONSISTENCY` | 3 | 198 |
+| Anomalies contextuelles avec un incident | 3/100 | 98/100 |
+| Incidents collaboratifs sur une mesure normale | 0 | 0 |
+| Incidents comme étiquettes : rappel / précision | 76,0 % / 92,7 % | 99,0 % / 94,3 % |
+
+Les incidents collaboratifs supplémentaires portent sur des anomalies contextuelles ou locales, jamais sur une mesure normale de cette session. Avec `report_all`, les incidents deviennent une source d'étiquettes presque complète pour IOT-157 ; ils restent moins utiles pour un B1 local, qui ne voit pas le contexte des autres capteurs.
+
+**Délai des lots**, test historique, une itération par seconde, 80 % des messages en 0 à 0,2 s et 20 % en retard de 1 à 9 s (moyennes de 3 graines) :
+
+| Délai | Lots complets / 200 | Rappel B2 | Délai de décision, médiane | Délai de décision, max |
+|---:|---:|---:|---:|---:|
+| 1 s | 104,0 | 50,0 % | 0,10 s | 0,94 s |
+| 2 s | 113,3 | 52,5 % | 0,11 s | 1,97 s |
+| 5 s (historique) | 148,7 | 69,2 % | 0,13 s | 4,99 s |
+| 10 s | 200,0 | 97,5 % | 0,18 s | 8,96 s |
+
+Un délai court ferme les lots avant l'arrivée des messages en retard ; un délai long attend les retardataires au prix d'une décision plus tardive pour les lots concernés. Avec ce modèle de retard, 10 s retrouve le rappel nominal (97,5 %). Le bon réglage dépend du réseau réel : ce modèle de retard est arbitraire et n'a pas été mesuré.
+
+**Tests :** `tests/test_edge_policy.py` (17 tests) — politique par défaut identique à l'historique, refus des champs interdits et des valeurs hors bornes, application unique d'une politique signée, scénarios de distribution dans les trois modes, isolement qui change le journal sans changer B2, délai MQTT piloté par la politique, application au démarrage.
+
+**Limites :** la politique est distribuée par fichier, pas par MCP ; une seule politique s'applique à tout l'Edge (pas de réglage par capteur) ; `report_all` multiplie les incidents envoyés au Cloud (39 au lieu de 3 sur le test historique) ; le modèle de retard est arbitraire.

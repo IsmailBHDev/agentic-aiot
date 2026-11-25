@@ -1,0 +1,352 @@
+{
+  "ticket": "IOT-159",
+  "generated_at": "2026-11-25T22:31:43.856324+00:00",
+  "environment": {
+    "python": "3.14.6",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "cryptography": "50.0.2"
+  },
+  "b2_threshold_celsius": 2.5,
+  "historical_policy": {
+    "batch_timeout_seconds": 5.0,
+    "isolation": "isolate_once"
+  },
+  "distribution": {
+    "none": {
+      "legitimate": {
+        "status": "applied",
+        "version": 2,
+        "batch_timeout_seconds": 5.0,
+        "isolation": "report_all"
+      },
+      "tampered_after_signing": {
+        "status": "applied",
+        "version": 2,
+        "batch_timeout_seconds": 60.0,
+        "isolation": "report_all"
+      },
+      "b2_threshold_injected": {
+        "status": "refused",
+        "reason": "forbidden_field",
+        "unchanged": true
+      },
+      "out_of_bounds_timeout": {
+        "status": "refused",
+        "reason": "timeout_out_of_bounds",
+        "unchanged": true
+      },
+      "older_version": {
+        "status": "refused",
+        "reason": "not_newer",
+        "unchanged": true
+      },
+      "cloud_cannot_publish_threshold": true
+    },
+    "ed25519": {
+      "legitimate": {
+        "status": "applied",
+        "version": 2,
+        "batch_timeout_seconds": 5.0,
+        "isolation": "report_all"
+      },
+      "tampered_after_signing": {
+        "status": "refused",
+        "reason": "bad_signature",
+        "unchanged": true
+      },
+      "b2_threshold_injected": {
+        "status": "refused",
+        "reason": "bad_signature",
+        "unchanged": true
+      },
+      "out_of_bounds_timeout": {
+        "status": "refused",
+        "reason": "timeout_out_of_bounds",
+        "unchanged": true
+      },
+      "older_version": {
+        "status": "refused",
+        "reason": "not_newer",
+        "unchanged": true
+      },
+      "signed_by_third_party": {
+        "status": "refused",
+        "reason": "bad_signature",
+        "unchanged": true
+      },
+      "unsigned": {
+        "status": "refused",
+        "reason": "bad_signature",
+        "unchanged": true
+      },
+      "cloud_cannot_publish_threshold": true
+    },
+    "ml-dsa-44": {
+      "legitimate": {
+        "status": "applied",
+        "version": 2,
+        "batch_timeout_seconds": 5.0,
+        "isolation": "report_all"
+      },
+      "tampered_after_signing": {
+        "status": "refused",
+        "reason": "bad_signature",
+        "unchanged": true
+      },
+      "b2_threshold_injected": {
+        "status": "refused",
+        "reason": "bad_signature",
+        "unchanged": true
+      },
+      "out_of_bounds_timeout": {
+        "status": "refused",
+        "reason": "timeout_out_of_bounds",
+        "unchanged": true
+      },
+      "older_version": {
+        "status": "refused",
+        "reason": "not_newer",
+        "unchanged": true
+      },
+      "signed_by_third_party": {
+        "status": "refused",
+        "reason": "bad_signature",
+        "unchanged": true
+      },
+      "unsigned": {
+        "status": "refused",
+        "reason": "bad_signature",
+        "unchanged": true
+      },
+      "cloud_cannot_publish_threshold": true
+    }
+  },
+  "b2_parity_historical_test": {
+    "timeout=1s,isolate_once": {
+      "b2_decisions": 600,
+      "matching_reference": 600,
+      "sensor_inconsistency_incidents": 3
+    },
+    "timeout=1s,report_all": {
+      "b2_decisions": 600,
+      "matching_reference": 600,
+      "sensor_inconsistency_incidents": 39
+    },
+    "timeout=2s,isolate_once": {
+      "b2_decisions": 600,
+      "matching_reference": 600,
+      "sensor_inconsistency_incidents": 3
+    },
+    "timeout=2s,report_all": {
+      "b2_decisions": 600,
+      "matching_reference": 600,
+      "sensor_inconsistency_incidents": 39
+    },
+    "timeout=5s,isolate_once": {
+      "b2_decisions": 600,
+      "matching_reference": 600,
+      "sensor_inconsistency_incidents": 3
+    },
+    "timeout=5s,report_all": {
+      "b2_decisions": 600,
+      "matching_reference": 600,
+      "sensor_inconsistency_incidents": 39
+    },
+    "timeout=10s,isolate_once": {
+      "b2_decisions": 600,
+      "matching_reference": 600,
+      "sensor_inconsistency_incidents": 3
+    },
+    "timeout=10s,report_all": {
+      "b2_decisions": 600,
+      "matching_reference": 600,
+      "sensor_inconsistency_incidents": 39
+    }
+  },
+  "isolation_session": "feedback-seed-909",
+  "isolation": {
+    "isolate_once": {
+      "sensor_inconsistency_incidents": 3,
+      "contextual_anomalies": 100,
+      "contextual_anomalies_with_incident": 3,
+      "collaborative_incidents_on_normal_measurements": 0,
+      "incident_label_quality": {
+        "n": 3000,
+        "tp": 152,
+        "fp": 12,
+        "fn": 48,
+        "recall": 0.76,
+        "precision": 0.9268
+      }
+    },
+    "report_all": {
+      "sensor_inconsistency_incidents": 198,
+      "contextual_anomalies": 100,
+      "contextual_anomalies_with_incident": 98,
+      "collaborative_incidents_on_normal_measurements": 0,
+      "incident_label_quality": {
+        "n": 3000,
+        "tp": 198,
+        "fp": 12,
+        "fn": 2,
+        "recall": 0.99,
+        "precision": 0.9429
+      }
+    }
+  },
+  "delay_model": {
+    "late_share": 0.2,
+    "on_time_delay_s": [
+      0.0,
+      0.2
+    ],
+    "late_delay_s": [
+      1.0,
+      9.0
+    ],
+    "iteration_period_s": 1.0,
+    "seeds": [
+      11,
+      22,
+      33
+    ]
+  },
+  "batch_timeout": {
+    "1": {
+      "runs": [
+        {
+          "seed": 11,
+          "batches_completed": 103,
+          "batches_expired": 97,
+          "b2_decisions": 309,
+          "b2_recall": 0.475,
+          "decision_delay_median_s": 0.107,
+          "decision_delay_max_s": 0.18
+        },
+        {
+          "seed": 22,
+          "batches_completed": 102,
+          "batches_expired": 98,
+          "b2_decisions": 306,
+          "b2_recall": 0.525,
+          "decision_delay_median_s": 0.1,
+          "decision_delay_max_s": 0.182
+        },
+        {
+          "seed": 33,
+          "batches_completed": 107,
+          "batches_expired": 93,
+          "b2_decisions": 321,
+          "b2_recall": 0.5,
+          "decision_delay_median_s": 0.105,
+          "decision_delay_max_s": 0.942
+        }
+      ],
+      "mean_batches_completed": 104,
+      "mean_b2_recall": 0.5,
+      "mean_decision_delay_median_s": 0.104
+    },
+    "2": {
+      "runs": [
+        {
+          "seed": 11,
+          "batches_completed": 112,
+          "batches_expired": 88,
+          "b2_decisions": 336,
+          "b2_recall": 0.5,
+          "decision_delay_median_s": 0.112,
+          "decision_delay_max_s": 1.973
+        },
+        {
+          "seed": 22,
+          "batches_completed": 112,
+          "batches_expired": 88,
+          "b2_decisions": 336,
+          "b2_recall": 0.525,
+          "decision_delay_median_s": 0.105,
+          "decision_delay_max_s": 1.873
+        },
+        {
+          "seed": 33,
+          "batches_completed": 116,
+          "batches_expired": 84,
+          "b2_decisions": 348,
+          "b2_recall": 0.55,
+          "decision_delay_median_s": 0.11,
+          "decision_delay_max_s": 1.857
+        }
+      ],
+      "mean_batches_completed": 113.3,
+      "mean_b2_recall": 0.525,
+      "mean_decision_delay_median_s": 0.109
+    },
+    "5": {
+      "runs": [
+        {
+          "seed": 11,
+          "batches_completed": 153,
+          "batches_expired": 47,
+          "b2_decisions": 459,
+          "b2_recall": 0.675,
+          "decision_delay_median_s": 0.141,
+          "decision_delay_max_s": 4.937
+        },
+        {
+          "seed": 22,
+          "batches_completed": 142,
+          "batches_expired": 58,
+          "b2_decisions": 426,
+          "b2_recall": 0.65,
+          "decision_delay_median_s": 0.126,
+          "decision_delay_max_s": 4.994
+        },
+        {
+          "seed": 33,
+          "batches_completed": 151,
+          "batches_expired": 49,
+          "b2_decisions": 453,
+          "b2_recall": 0.75,
+          "decision_delay_median_s": 0.134,
+          "decision_delay_max_s": 4.752
+        }
+      ],
+      "mean_batches_completed": 148.7,
+      "mean_b2_recall": 0.6917,
+      "mean_decision_delay_median_s": 0.134
+    },
+    "10": {
+      "runs": [
+        {
+          "seed": 11,
+          "batches_completed": 200,
+          "batches_expired": 0,
+          "b2_decisions": 600,
+          "b2_recall": 0.975,
+          "decision_delay_median_s": 0.172,
+          "decision_delay_max_s": 8.892
+        },
+        {
+          "seed": 22,
+          "batches_completed": 200,
+          "batches_expired": 0,
+          "b2_decisions": 600,
+          "b2_recall": 0.975,
+          "decision_delay_median_s": 0.18,
+          "decision_delay_max_s": 8.961
+        },
+        {
+          "seed": 33,
+          "batches_completed": 200,
+          "batches_expired": 0,
+          "b2_decisions": 600,
+          "b2_recall": 0.975,
+          "decision_delay_median_s": 0.175,
+          "decision_delay_max_s": 8.819
+        }
+      ],
+      "mean_batches_completed": 200,
+      "mean_b2_recall": 0.975,
+      "mean_decision_delay_median_s": 0.176
+    }
+  }
+}
