@@ -82,3 +82,31 @@ Débit tenu (au moins 95 % du débit offert et p95 ≤ 100 ms) : 50 000 msg/s en
 - Ces chiffres décrivent le calcul de l'Edge sur un PC ; le broker MQTT, le réseau et un matériel Edge contraint réduiraient ces débits.
 
 **Tests :** `tests/test_edge_load.py` (2 tests) — structure de la mesure et restauration de l'état, régression de l'anti-rejeu.
+
+## IOT-156 — Contrainte TinyML (B1)
+
+**Résultat :** le B1 historique tient en 42 octets une fois élagué et quantifié en entiers 16 bits, au lieu de 2 793 octets dans son fichier scikit-learn, sans changer une seule prédiction sur les 3 000 observations testées (F1 inchangé à 84,93 %). Au capteur, le coût d'inférence vient surtout de l'appel scikit-learn avec pandas, pas du modèle.
+
+**Protocole (`src/evaluate_tinyml.py`) :** le B1 historique (arbre de profondeur 3, graine 42) est réentraîné en mémoire sur `data/collaborative_train.csv` ; le script vérifie d'abord qu'il reproduit les 600 prédictions de `results/baseline_b1_predictions.csv`. Aucun modèle n'est écrit. Résultats : `results/tinyml_b1_2026-11-25.json` (environnement de vérification Linux, Python 3.13.18, scikit-learn 1.9.1).
+
+| Variante | Nœuds | Taille | Accord test / entraînement | F1 test |
+|---|---:|---:|---:|---:|
+| Modèle scikit-learn (joblib) | 15 | 2 793 octets | 600/600 · 2 400/2 400 | 84,93 % |
+| Arbre élagué, seuils float64 | 11 | 72 octets | 600/600 · 2 400/2 400 | 84,93 % |
+| Élagué, entiers en millièmes (int32) | 11 | 52 octets | 600/600 · 2 400/2 400 | 84,93 % |
+| Élagué, entiers en centièmes (int16) | 11 | 42 octets | 600/600 · 2 400/2 400 | 84,93 % |
+
+L'élagage retire les branches dont les deux feuilles portent la même classe ; il ne peut pas changer une prédiction. La quantification en centièmes perd de la précision sur les mesures, mais aucun échantillon de ces données ne tombe assez près d'un seuil pour changer de classe ; ce résultat dépend des données et doit être revérifié si elles changent.
+
+| Inférence d'un échantillon (Python sur PC) | Moyenne |
+|---|---:|
+| scikit-learn avec DataFrame (comme le simulateur) | 0,371 ms |
+| scikit-learn avec tableau NumPy | 0,077 ms |
+| Table élaguée, seuils float | 0,0003 ms |
+| Table élaguée, entiers int32 | 0,0005 ms |
+
+Ces temps Python ne représentent pas un microcontrôleur ; seuls les tailles et les accords sont transposables. Sur microcontrôleur, la table de 42 octets se parcourt en au plus trois comparaisons d'entiers.
+
+**Constat à traiter :** le modèle chargé par le simulateur (`models/device_model.joblib`) n'est pas le B1 évalué. C'est un arbre à une seule comparaison (température > 33,01 °C), qui atteint un F1 de 66,67 % sur le test et diffère du B1 de référence sur 13 des 600 observations. Les résultats B1/B2 du rapport ne sont pas affectés, puisqu'ils utilisent le B1 de référence, mais le prototype de bout en bout utilise un modèle plus faible. Ce fichier figurant dans le manifeste de reproduction, il n'a pas été modifié : voir IOT-180.
+
+**Tests :** `tests/test_tinyml.py` (7 tests) — reproduction de la référence, accord total des variantes compressées, réduction des nœuds et des octets, élagage sans effet sur les prédictions, signalement du modèle du simulateur.
