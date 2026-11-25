@@ -14,7 +14,7 @@ import platform
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
-from statistics import fmean
+from statistics import fmean, median
 
 LATENCIES = ("edge_to_cloud", "cloud_to_decision", "edge_to_decision")
 VOLUMES = (
@@ -57,6 +57,13 @@ def summarize(runs):
                 name: round(fmean(run["latency_mean_ms"][name] for run in items), 2)
                 for name in LATENCIES
             },
+            "edge_to_decision_median_ms": round(
+                median(run["latency_mean_ms"]["edge_to_decision"] for run in items), 2
+            ),
+            "edge_to_decision_range_ms": [
+                round(min(run["latency_mean_ms"]["edge_to_decision"] for run in items), 2),
+                round(max(run["latency_mean_ms"]["edge_to_decision"] for run in items), 2),
+            ],
             "per_run_mean": {
                 name: round(fmean(run["messages"].get(name, 0) for run in items), 1)
                 for name in VOLUMES
@@ -64,23 +71,26 @@ def summarize(runs):
         }
     baseline = summary.get("none|none")
     if baseline:
-        reference = baseline["latency_mean_ms"]["edge_to_decision"]
+        reference = baseline["edge_to_decision_median_ms"]
         for item in summary.values():
-            latency = item["latency_mean_ms"]["edge_to_decision"]
-            item["edge_to_decision_vs_c0_ms"] = round(latency - reference, 2)
+            item["edge_to_decision_median_vs_c0_ms"] = round(
+                item["edge_to_decision_median_ms"] - reference, 2
+            )
     return summary
 
 
 def table(summary):
     lines = [
-        "| Configuration | Répétitions | Livrés / décisions | Edge → décision (ms) | Écart à C0 (ms) | Charge MQTT-SN + CoAP (octets) | Corps HTTP MCP (octets) |",
-        "|---|---:|---:|---:|---:|---:|---:|",
+        "| Configuration | Répétitions | Livrés / décisions | Edge → décision, médiane (ms) | Min–max (ms) | Écart médian à C0 (ms) | Charge MQTT-SN + CoAP (octets) | Corps HTTP MCP (octets) |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for item in summary.values():
         volume = item["per_run_mean"]
         lines.append(
             f"| {item['label']} | {item['runs']} | {item['incidents']}/{item['decisions']} | "
-            f"{item['latency_mean_ms']['edge_to_decision']} | {item.get('edge_to_decision_vs_c0_ms', '—')} | "
+            f"{item['edge_to_decision_median_ms']} | "
+            f"{item['edge_to_decision_range_ms'][0]}–{item['edge_to_decision_range_ms'][1]} | "
+            f"{item.get('edge_to_decision_median_vs_c0_ms', '—')} | "
             f"{volume['mqttsn_payload_bytes'] + volume['coap_payload_bytes']:.0f} | "
             f"{volume['mcp_request_body_bytes']:.0f} |"
         )

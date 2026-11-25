@@ -46,6 +46,26 @@ def telemetry(session, index):
 
 @pytest.mark.parametrize("run_number", [1, 2, 3])
 def test_b3_replay_mqttsn_and_coap(tmp_path, monkeypatch, run_number):
+    # IOT-178 : configurations C0 à C2 choisies par AIOT_AUTH_MODE et AIOT_CHANNEL_MODE.
+    # Sans ces variables, le banc reste en C0, comme avant. Les clés de chaque
+    # répétition sont créées AVANT d'importer l'Edge et le pont, qui les chargent
+    # dès leur import.
+    import message_auth
+    import secure_channel
+
+    devices = ("node-01", "node-02", "node-03")
+    auth_mode = message_auth.auth_mode()
+    channel_mode = secure_channel.channel_mode()
+    monkeypatch.setenv(message_auth.KEY_DIR_ENV, str(tmp_path / "keys"))
+    if auth_mode != message_auth.NO_AUTH:
+        message_auth.create_keyring(auth_mode, devices)
+    if channel_mode != secure_channel.NO_CHANNEL:
+        secure_channel.create_channel_keys(channel_mode)
+    signers = (
+        {device: message_auth.load_signer(device, auth_mode) for device in devices}
+        if auth_mode != message_auth.NO_AUTH else {}
+    )
+
     import uvicorn
     from aiocoap import Code, Context, Message, resource
 
@@ -79,26 +99,10 @@ def test_b3_replay_mqttsn_and_coap(tmp_path, monkeypatch, run_number):
     monkeypatch.setattr(orchestrator, "INCIDENTS_FILE", cloud_file)
     monkeypatch.setattr(orchestrator, "DECISIONS_FILE", decision_file)
 
-    # IOT-178 : configurations C0 à C2 choisies par AIOT_AUTH_MODE et AIOT_CHANNEL_MODE.
-    # Sans ces variables, le banc reste en C0, comme avant. Les clés sont créées
-    # pour chaque répétition dans un dossier temporaire.
+    # IOT-178 : vérificateur, scellement et ouverture liés aux clés de cette répétition
     import cloud_store
     import edge_cloud_bridge
-    import message_auth
-    import secure_channel
 
-    devices = ("node-01", "node-02", "node-03")
-    auth_mode = message_auth.auth_mode()
-    channel_mode = secure_channel.channel_mode()
-    monkeypatch.setenv(message_auth.KEY_DIR_ENV, str(tmp_path / "keys"))
-    if auth_mode != message_auth.NO_AUTH:
-        message_auth.create_keyring(auth_mode, devices)
-    if channel_mode != secure_channel.NO_CHANNEL:
-        secure_channel.create_channel_keys(channel_mode)
-    signers = (
-        {device: message_auth.load_signer(device, auth_mode) for device in devices}
-        if auth_mode != message_auth.NO_AUTH else {}
-    )
     monkeypatch.setattr(mqtt_edge, "message_verifier", message_auth.verifier_from_env(devices))
     monkeypatch.setattr(edge_cloud_bridge, "edge_sealer", secure_channel.sealer_from_env())
     monkeypatch.setattr(cloud_store, "_opener_cache", {})
@@ -163,12 +167,21 @@ def test_b3_replay_mqttsn_and_coap(tmp_path, monkeypatch, run_number):
             collector = TelemetryResource()
             site.add_resource(["telemetry"], collector)
             site.add_resource(["alert"], AlertResource())
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as reservation:
-                reservation.bind(("127.0.0.1", 0))
-                coap_port = reservation.getsockname()[1]
-            coap_server = await Context.create_server_context(
-                site, bind=("127.0.0.1", coap_port)
-            )
+            # Sous Windows, un port libéré peut être refusé à la réouverture
+            # (WinError 10013, plages réservées par Hyper-V ou Docker) : on réessaie.
+            for attempt in range(20):
+                with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as reservation:
+                    reservation.bind(("127.0.0.1", 0))
+                    coap_port = reservation.getsockname()[1]
+                try:
+                    coap_server = await Context.create_server_context(
+                        site, bind=("127.0.0.1", coap_port)
+                    )
+                    break
+                except OSError:
+                    if attempt == 19:
+                        raise
+                    transport_counts["coap_bind_retries"] += 1
             coap_client = await Context.create_client_context()
             bridge = asyncio.create_task(watch_incidents(edge_file, mcp_url, interval=0.02))
             await asyncio.sleep(0)

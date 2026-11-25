@@ -251,7 +251,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
   2. Distinguer attaquant classique et attaquant quantique (« récolter maintenant, déchiffrer plus tard »).
   3. Fixer ce qui est hors périmètre : capteur compromis avec sa clé privée.
   4. Reporter le résultat dans la section 5.6 du rapport.
-- [~] **IOT-173 — Choisir la bibliothèque** Décision : `cryptography` 50.0.2, déjà épinglée, pour Ed25519, ML-DSA-44 (défaut) et ML-KEM-768 ; FN-DSA (C3) reporté et optionnel. Réf. : [`docs/pq_library_choice.md`](pq_library_choice.md), `tests/test_pq_primitives.py` (10 tests réussis sous Linux). Reste : confirmer Windows par la CI de la PR.
+- [x] **IOT-173 — Choisir la bibliothèque** Décision : `cryptography` 50.0.2, déjà épinglée, pour Ed25519, ML-DSA-44 (défaut) et ML-KEM-768 ; FN-DSA (C3) reporté et optionnel. Réf. : [`docs/pq_library_choice.md`](pq_library_choice.md), `tests/test_pq_primitives.py` (10 tests réussis sous Linux). Confirmé sous Windows le 25 novembre 2026 (Python 3.14.6, suite complète : 130 réussis, 5 ignorés car réseau).
   1. Installer liboqs et son interface Python sous Windows et Linux ; noter les versions.
   2. Vérifier ML-DSA, ML-KEM et FN-DSA, plus Ed25519 comme référence classique.
   3. Mettre ces dépendances dans un fichier séparé pour ne pas casser la CI.
@@ -271,7 +271,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
 - [x] **IOT-177 — Établir le canal Edge–Cloud avec ML-KEM** Réf. : `src/secure_channel.py` (modes `x25519`, `ml-kem-768` et hybride `x25519+ml-kem-768` via `AIOT_CHANNEL_MODE` ; HKDF-SHA256, AES-256-GCM, incident signé par l'Edge en Ed25519 ou ML-DSA-44, rejeu refusé), scellement dans `src/edge_cloud_bridge.py`, ouverture dans `src/cloud_store.py`, `tests/test_secure_channel.py` (23 tests). Le passage réel par MCP reste à valider avec `AIOT_TEST_NETWORK=1`.
   1. Échanger une clé de session ML-KEM, puis chiffrer les incidents.
   2. Option : version hybride classique + post-quantique.
-- [~] **IOT-178 — Mesurer le coût** Réf. : `src/evaluate_pq_cost.py`, `results/pq_cost_2026-11-23.json`, `tests/test_pq_cost.py`. Mesures hors réseau : primitives sur 1 000 opérations, tailles des messages et incidents scellés, traitement Edge sur 5 × 600 messages. Message de télémétrie : 356 octets en clair, 508 avec Ed25519, 3 650 avec ML-DSA-44 (× 10,25). Calcul ajouté inférieur à 1 ms par message ou incident. Reste : latence du banc B3 en réseau local avec `AIOT_TEST_NETWORK=1`, et mesures dans l'environnement de référence Windows.
+- [x] **IOT-178 — Mesurer le coût** Réf. : `src/evaluate_pq_cost.py`, `results/pq_cost_2026-11-23.json`, `tests/test_pq_cost.py`. Mesures hors réseau : primitives sur 1 000 opérations, tailles des messages et incidents scellés, traitement Edge sur 5 × 600 messages. Message de télémétrie : 356 octets en clair, 508 avec Ed25519, 3 650 avec ML-DSA-44 (× 10,25). Calcul ajouté inférieur à 1 ms par message ou incident. Banc B3 en réseau local (25 novembre 2026, Windows, 6 répétitions et 108 incidents par configuration) : `results/pq_b3_network_2026-11-25.json`, `src/summarize_pq_b3.py`. 108/108 livrés et conformes partout, y compris incidents scellés via MCP ; volume × 13 vers l'Edge et × 11 vers MCP en ML-DSA-44 ; effet sur la latence non distinguable de la variabilité du banc.
   1. Tailles des clés, des signatures et des messages.
   2. Temps de signature et de vérification sur 1 000 opérations.
   3. Latence Edge → décision et octets par incident avec le banc B3 (3 répétitions), pour C0, C1, C2 et C3.

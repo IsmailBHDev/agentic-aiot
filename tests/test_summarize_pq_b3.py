@@ -37,7 +37,9 @@ def test_summary_groups_configurations_and_compares_to_c0():
     c2 = summary["ml-dsa-44|ml-kem-768"]
     assert c0["runs"] == 2 and c0["incidents"] == 36
     assert c0["latency_mean_ms"]["edge_to_decision"] == 510.0
-    assert c2["edge_to_decision_vs_c0_ms"] == 20.0
+    assert c0["edge_to_decision_median_ms"] == 510.0
+    assert c0["edge_to_decision_range_ms"] == [500.0, 520.0]
+    assert c2["edge_to_decision_median_vs_c0_ms"] == 20.0
     assert c2["per_run_mean"]["mqttsn_payload_bytes"] == 80000
     assert c2["label"].startswith("C2")
 
