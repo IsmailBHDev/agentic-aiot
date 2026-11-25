@@ -285,7 +285,7 @@ Périmètre validé par le professeur : simulation logicielle, sans matériel ES
   2. Vérifier que l'Edge continue B1, B2 et la journalisation.
   3. Relancer le Cloud et vérifier que le pont transmet les incidents en attente.
   4. Acceptation : aucun incident perdu ; décisions B2 identiques avec ou sans Cloud.
-- [ ] **IOT-153 — Coupure Device → Edge : pertes, lots incomplets, B1 traité immédiatement, aucune double décision.**
+- [x] **IOT-153 — Coupure Device → Edge** Réf. : `src/evaluate_device_loss.py`, `results/resilience_device_loss_2026-11-25.json`, `tests/test_device_loss.py` (6 tests), [`docs/resilience.md`](resilience.md). De 0 à 30 % de pertes, avec doublons et désordre : aucune double décision, aucune décision B2 fausse, chaque alerte B1 reçue journalisée immédiatement. Le rappel B2 tombe de 97,5 % à 74,2 % à 10 % de pertes (87,5 % avec les alertes B1), car un lot exige les trois capteurs.
 - [ ] **IOT-154 — Surcharge : débit croissant ; mesure de la latence, des pertes et du point de saturation de l'Edge.**
 - [ ] **IOT-155 — Benchmark des trois niveaux : inférence Device, orchestration Edge, réponse Cloud (et RAG après E14), dans un fichier séparé.**
 - [ ] **IOT-156 — Simuler la contrainte TinyML : taille du modèle, temps d'inférence ; version compressée évaluée à part.**
